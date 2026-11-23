@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>أبو حسام - منظومة المحاسبة والفوترة والرواتب المتكاملة</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--primary:#065f46;--secondary:#059669;--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--danger:#dc2626;--warning:#d97706;--info:#1d4ed8;--hr-color:#4f46e5;--price-color:#6d28d9;--inv-color:#0f766e}
+*{box-sizing:border-box;font-variant-numeric:tabular-nums lining-nums}
+html,body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;width:100%;overflow-x:hidden}
+.en-num,input[type="number"],input[type="date"],input[type="time"],.val,.badge-order-id,.badge-inv-id,.badge-seq,.badge-emp-seq,td{font-family:Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums lining-nums}
+#login-screen{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#065f46,#047857);padding:1rem}
+.login-box{background:#fff;padding:2rem;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.2);width:100%;max-width:390px;text-align:center}
+.login-box h2{color:var(--primary);margin:0 0 6px;font-size:1.5rem}
+.login-logo-img{max-height:78px;max-width:190px;object-fit:contain;margin:0 auto 10px;display:block;border-radius:10px}
+header{background:linear-gradient(90deg,#065f46,#047857);color:#fff;padding:.75rem 1.1rem;display:flex;justify-content:space-between;align-items:center;font-size:1.05rem;font-weight:bold;box-shadow:0 2px 10px rgba(0,0,0,.12);flex-wrap:wrap;gap:8px}
+.header-brand{display:flex;align-items:center;gap:10px}
+.header-logo-img{height:38px;width:38px;object-fit:contain;background:#fff;padding:2px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.header-actions{display:flex;gap:6px;align-items:center;font-size:.85rem;font-weight:normal;flex-wrap:wrap}
+.btn-sync,.btn-logo,.btn-logout{color:#fff;border:none;padding:6px 11px;border-radius:8px;cursor:pointer;font-weight:bold;width:auto;margin:0}
+.btn-sync{background:#0284c7}.btn-logo{background:#4f46e5}.btn-logout{background:var(--danger)}
+.container{max-width:1160px;margin:.9rem auto;padding:0 .7rem;width:100%}
+.tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem}
+@media(min-width:768px){.tabs{grid-template-columns:repeat(5,1fr)}}
+.tab{padding:.8rem .5rem;background:#fff;cursor:pointer;border-radius:10px;text-align:center;font-weight:bold;transition:.2s;color:#334155;border:1.5px solid #cbd5e1;font-size:.88rem}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 4px 10px rgba(6,95,70,.22)}
+.tab.cust-tab.active{background:#0284c7;border-color:#0284c7;color:#fff}
+.tab.inv-tab.active{background:var(--inv-color);border-color:#0f766e;color:#fff}
+.tab.price-tab.active{background:var(--price-color);border-color:var(--price-color);color:#fff}
+.tab.hr-tab.active{background:var(--hr-color);border-color:var(--hr-color);color:#fff}
+.sub-tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:768px){.sub-tabs.cols-5{grid-template-columns:repeat(5,1fr)}.sub-tabs.cols-4{grid-template-columns:repeat(4,1fr)}.sub-tabs.cols-3{grid-template-columns:repeat(3,1fr)}}
+.sub-tab{padding:10px 6px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:8px;text-align:center;font-weight:bold;font-size:.84rem;cursor:pointer;color:#334155;transition:.2s}
+.sub-tab.active{background:var(--hr-color);color:#fff;border-color:var(--hr-color);box-shadow:0 3px 8px rgba(79,70,229,.25)}
+.card{background:var(--card);padding:1.1rem;border-radius:12px;box-shadow:0 2px 6px rgba(15,23,42,.06);margin-bottom:1rem;width:100%;border:1px solid var(--border)}
+.section-title{margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--border);font-size:1.12rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:10px}
+@media(min-width:768px){.form-grid.cols-2{grid-template-columns:1fr 1fr}.form-grid.cols-3{grid-template-columns:1fr 1fr 1fr}.form-grid.cols-4{grid-template-columns:repeat(4,1fr)}}
+label{display:block;margin-bottom:.35rem;font-weight:bold;font-size:.88rem;color:#1e293b}
+input,select,button{width:100%;padding:.65rem .75rem;border:1.5px solid #cbd5e1;border-radius:8px;font-family:inherit;font-size:.96rem;background:#fff;color:#0f172a}
+input:focus,select:focus{outline:none;border-color:var(--secondary);box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+input[type="checkbox"]{width:22px;height:22px;cursor:pointer;accent-color:#059669}
+button{background:var(--secondary);color:#fff;border:none;cursor:pointer;font-weight:bold;transition:.2s}
+button:active{transform:scale(.98)}
+.hidden{display:none!important}
+.acc-dashboard{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:768px){.acc-dashboard{grid-template-columns:repeat(4,1fr)}.acc-dashboard.cols-5{grid-template-columns:repeat(5,1fr)}}
+.acc-box{background:#fff;padding:11px 8px;border-radius:10px;text-align:center;border:2px solid}
+.acc-box h4{margin:0 0 5px;font-size:.82rem;line-height:1.3}
+.acc-box .val{font-size:1.25rem;font-weight:900;direction:ltr;word-break:break-word}
+.badge-order-id{background:#ef4444;color:#fff;padding:4px 10px;border-radius:6px;font-weight:900;font-size:.92rem;display:inline-block;direction:ltr}
+.badge-inv-id{background:#0f766e;color:#fff;padding:4px 12px;border-radius:6px;font-weight:900;font-size:.92rem;display:inline-block;direction:ltr;border:1.5px solid #99f6e4}
+.badge-seq{background:#1e3a8a;color:#fff;padding:3px 9px;border-radius:6px;font-weight:900;font-size:.84rem;display:inline-block;direction:ltr}
+.badge-emp-seq{background:#4f46e5;color:#fff;padding:3px 8px;border-radius:6px;font-weight:900;font-size:.84rem;display:inline-block;direction:ltr}
+.badge-status{padding:4px 8px;border-radius:6px;font-weight:bold;font-size:.8rem;display:inline-block}
+.table-wrap{width:100%;overflow-x:auto;border-radius:8px;border:1px solid #cbd5e1;background:#fff}
+.data-table{width:100%;border-collapse:collapse;font-size:.86rem;background:#fff}
+.data-table th,.data-table td{border:1px solid #e2e8f0;padding:8px 6px;text-align:center}
+.data-table th{background:var(--primary);color:#fff;font-weight:bold;white-space:nowrap}
+.data-table tr:nth-child(even){background:#f8fafc}
+.pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:768px){.pricing-grid{grid-template-columns:repeat(3,1fr)}}
+.price-item{background:#f8fafc;border:1px solid #cbd5e1;padding:8px;border-radius:8px}
+.price-item label{color:#1e293b;font-size:.8rem;margin-bottom:5px;line-height:1.3}
+.price-item input{font-weight:bold;text-align:center;color:var(--price-color);border:2px solid #c4b5fd;padding:.45rem;direction:ltr}
+.order-divider-banner{display:flex;align-items:center;gap:10px;margin:18px 0 9px}
+.order-divider-banner::before,.order-divider-banner::after{content:"";flex:1;height:3px;background:repeating-linear-gradient(90deg,#0284c7,#0284c7 8px,transparent 8px,transparent 14px);border-radius:2px}
+.order-divider-pill{background:#1e3a8a;color:#fff;padding:4px 13px;border-radius:999px;font-size:.84rem;font-weight:900;white-space:nowrap;box-shadow:0 2px 6px rgba(30,58,138,.22)}
+.order-divider-pill.alt-pill{background:#6d28d9}.order-divider-pill.alt-pill-2{background:#0f766e}
+.cust-order-card{border:2.5px solid #94a3b8;border-right:8px solid #0284c7;border-radius:12px;padding:13px;margin-bottom:6px;background:#fff;transition:.2s;box-shadow:0 3px 10px rgba(15,23,42,.06)}
+.cust-order-card.alt-1{border-right-color:#6d28d9;background:#faf5ff}
+.cust-order-card.alt-2{border-right-color:#0f766e;background:#f0fdfa}
+.cust-order-card.selected-for-bill{border-color:#059669;border-right:8px solid #059669;background:#f0fdf4;box-shadow:0 0 0 3px rgba(5,150,105,.2)}
+.invoice-record-card{border:2px solid #0f766e;border-radius:10px;padding:14px;margin-bottom:14px;background:#f0fdfa}
+.inv-order-mini-row{background:#fff;border:1px solid #cbd5e1;border-right:4px solid #0f766e;border-radius:6px;padding:6px 9px;margin-bottom:6px;font-size:.83rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.cust-order-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px dashed #cbd5e1;padding-bottom:8px;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.clean-spec-box{background:#eff6ff;border-right:4px solid #0284c7;padding:8px 10px;border-radius:6px;font-weight:bold;color:#1e3a8a;font-size:.9rem;margin-bottom:8px;line-height:1.5}
+.billing-action-bar{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:#fff;padding:14px;border-radius:10px;margin-bottom:15px}
+.calc-panel{background:#f8fafc;border:2px solid #6366f1;border-radius:12px;padding:14px}
+.ot-rate-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px}
+@media(min-width:600px){.ot-rate-btns{grid-template-columns:repeat(4,1fr)}}
+.ot-btn,.fri-btn{padding:8px 6px;border-radius:8px;border:1.5px solid #cbd5e1;background:#fff;color:#334155;font-size:.84rem;font-weight:bold;cursor:pointer}
+.ot-btn.active{background:#4f46e5;color:#fff;border-color:#4f46e5}
+.fri-btn.active{background:#d97706;color:#fff;border-color:#d97706}
+.calc-summary-box{background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border:2px solid #10b981;border-radius:10px;padding:14px;margin-top:12px}
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #a7f3d0;font-size:.94rem;font-weight:bold}
+.calc-row:last-child{border-bottom:none;padding-top:10px;font-size:1.25rem;color:#065f46}
+.att-worker-card{background:#fff;border:1.5px solid #cbd5e1;border-radius:10px;padding:12px;margin-bottom:10px}
+.att-worker-card.present{border-color:#10b981;background:#f0fdf4}
+.att-worker-card.done{border-color:#0284c7;background:#f0f9ff}
+.att-worker-card.friday-ot{border-color:#f59e0b;background:#fffbeb}
+.friday-banner{background:#fef3c7;border:2px solid #f59e0b;color:#92400e;padding:10px 12px;border-radius:10px;margin-bottom:10px;font-weight:bold;font-size:.88rem}
+.already-paid-banner{background:#fef2f2;border:2px solid #dc2626;color:#991b1b;padding:10px 12px;border-radius:8px;margin-bottom:10px;font-weight:bold;font-size:.88rem;line-height:1.6}
+.bulk-shift-box{background:#fff;border:2px solid #4f46e5;border-radius:10px;padding:12px;margin-bottom:14px}
+.excuse-btn{width:auto;padding:5px 9px;font-size:.78rem;border-radius:6px;margin:2px;color:#fff}
+.excuse-btn.remove-abs{background:#059669}.excuse-btn.undo-abs,.excuse-btn.undo-late{background:#64748b}.excuse-btn.remove-late{background:#0284c7}
+.modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,.75);z-index:2000;justify-content:center;align-items:center;padding:15px}
+.modal-content{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:460px;position:relative;max-height:90vh;overflow-y:auto}
+.seq-counters-bar{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:#1e293b;color:#fff;padding:10px 12px;border-radius:10px;margin-bottom:12px;font-size:.84rem}
+@media(min-width:768px){.seq-counters-bar{grid-template-columns:repeat(4,1fr)}}
+.seq-counter-item{background:rgba(255,255,255,.1);padding:6px 10px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;font-weight:bold}
+.seq-counter-item span.num{background:#10b981;color:#fff;padding:2px 8px;border-radius:4px;font-weight:900;font-size:.92rem;direction:ltr}
+#fixed-doc-preview{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0f172a;z-index:9999;flex-direction:column;overflow:hidden}
+.doc-preview-topbar{background:#1e293b;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-shrink:0;border-bottom:2px solid #334155}
+.doc-preview-topbar button{margin:0;padding:10px;font-size:.95rem;border-radius:8px;flex:1}
+.doc-preview-stage{flex:1;position:relative;width:100%;height:100%;overflow:hidden}
+#doc-scale-box{background:#fff;width:610px;padding:14px;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.5);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transform-origin:center center;direction:rtl}
+#print-area{display:none}
+@media print{body *{visibility:hidden}#print-area,#print-area *{visibility:visible}#print-area{display:block;position:absolute;left:0;top:0;width:100%}}
+</style>
+</head>
+<body>
+<div id="login-screen">
+<div class="login-box">
+<img id="login-logo-img" class="login-logo-img hidden" alt="Logo">
+<h2 id="login-company-title">منظومة المحاسبة والرواتب</h2>
+<p style="color:#64748b;font-size:.9rem;margin-bottom:1.2rem">مربوطة مباشرة مع المعمل وتطبيق مراقب الدوام</p>
+<input type="text" id="login-name" placeholder="اسم المستخدم" autocomplete="username" style="margin-bottom:10px">
+<input type="password" id="login-pass" placeholder="كلمة المرور" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()" style="margin-bottom:15px;direction:ltr;text-align:center">
+<button onclick="login()" style="font-size:1.05rem;padding:12px">دخول للنظام المالي</button>
+</div>
+</div>
+
+<div id="main-app" class="hidden">
+<header>
+<div class="header-brand">
+<img id="header-logo-img" class="header-logo-img hidden" alt="Logo">
+<div id="header-company-title">أبو حسام - المحاسبة والرواتب</div>
+</div>
+<div class="header-actions">
+<span id="sync-status" style="background:rgba(255,255,255,.18);padding:4px 8px;border-radius:6px">متصل ●</span>
+<button class="btn-sync" onclick="syncWithSystem()">تحديث</button>
+<button class="btn-logo" onclick="openLogoSettingsModal()">اللوغو</button>
+<span id="user-welcome"></span>
+<button class="btn-logout" onclick="logout()">خروج</button>
+</div>
+</header>
+
+<div class="container">
+<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;padding:10px 12px;border-radius:10px;margin-bottom:10px;border:1px solid #cbd5e1;gap:10px;flex-wrap:wrap">
+<div style="font-weight:bold;color:var(--primary);font-size:.94rem">عملة الحساب والتسعير:</div>
+<div style="display:flex;gap:8px;flex:1;min-width:220px">
+<button id="curr-btn-SYP" onclick="setActiveCurrency('SYP')" style="margin:0;flex:1;padding:8px;background:var(--primary)">ليرة سورية (SYP)</button>
+<button id="curr-btn-USD" onclick="setActiveCurrency('USD')" style="margin:0;flex:1;padding:8px;background:#64748b">دولار ($)</button>
+</div>
+</div>
+
+<div class="seq-counters-bar">
+<div class="seq-counter-item"><span>آخر عملية:</span><span class="num en-num" id="top-seq-op">0</span></div>
+<div class="seq-counter-item"><span>آخر فاتورة:</span><span class="num en-num" id="top-seq-inv" style="background:#0f766e">0</span></div>
+<div class="seq-counter-item"><span>آخر إيصال:</span><span class="num en-num" id="top-seq-rec" style="background:#d97706">0</span></div>
+<div class="seq-counter-item"><span>آخر قسيمة راتب:</span><span class="num en-num" id="top-seq-pay" style="background:#4f46e5">0</span></div>
+</div>
+
+<div class="acc-dashboard">
+<div class="acc-box" style="border-color:#10b981;background:#f0fdf4"><h4 style="color:#047857">مقبوضات الصندوق</h4><div class="val" id="dash-cash-in" style="color:#059669">0</div></div>
+<div class="acc-box" style="border-color:#ef4444;background:#fef2f2"><h4 style="color:#b91c1c">مدفوعات الصندوق</h4><div class="val" id="dash-cash-out" style="color:#dc2626">0</div></div>
+<div class="acc-box" style="border-color:#3b82f6;background:#eff6ff"><h4 style="color:#1d4ed8">صافي الصندوق</h4><div class="val" id="dash-cash-balance" style="color:#2563eb">0</div></div>
+<div class="acc-box" style="border-color:#f59e0b;background:#fffbeb"><h4 style="color:#b45309">ديون الزبائن لنا</h4><div class="val" id="dash-total-debts" style="color:#d97706">0</div></div>
+</div>
+
+<div class="tabs">
+<div class="tab cust-tab active" onclick="switchTab('tab-customer-file',this)">الزبون وملفه <span id="unbilled-badge" class="en-num" style="background:#ef4444;color:#fff;padding:1px 6px;border-radius:10px;font-size:.78rem">0</span></div>
+<div class="tab inv-tab" onclick="switchTab('tab-invoices-registry',this)">سجل الفواتير</div>
+<div class="tab price-tab" onclick="switchTab('tab-pricing-setup',this)">التسعير الشامل</div>
+<div class="tab" onclick="switchTab('tab-journal',this)">دفتر الصندوق</div>
+<div class="tab hr-tab" onclick="switchTab('tab-workers-payroll',this)">العمال والرواتب</div>
+</div>
+
+<div id="tab-customer-file" class="card tab-section">
+<h3 class="section-title" style="color:#0284c7">ملف الزبون وإصدار الفواتير وكشف الحساب</h3>
+<div style="background:#f0fdf4;border:2px solid #86efac;padding:12px;border-radius:10px;margin-bottom:15px">
+<label style="color:#065f46">ابحث عن الزبون بالاسم أو الهاتف:</label>
+<input type="text" id="cust-file-search" placeholder="اكتب اسم الزبون هنا..." onkeyup="populateCustFileSelector()" style="margin-bottom:10px;border:1px solid #10b981">
+<label style="color:#065f46">اختر الزبون لفتح ملفه المالي:</label>
+<select id="cust-file-select" onchange="onSelectCustomerChange()" style="font-weight:bold;font-size:1rem;border:2px solid #059669;margin-bottom:10px"></select>
+<button onclick="showAllCustomersSummaryModal()" style="background:#b45309;padding:10px">عرض جدول أرصدة جميع الزبائن</button>
+</div>
+
+<div id="customer-workspace" class="hidden">
+<div style="background:#e0f2fe;border:2px solid #7dd3fc;border-radius:10px;padding:14px;margin-bottom:15px">
+<h3 id="cw-name" style="margin:0 0 6px;color:#0369a1;font-size:1.25rem"></h3>
+<div id="cw-meta" class="en-num" style="color:#1e293b;font-weight:bold;font-size:.92rem;margin-bottom:8px"></div>
+<div id="cw-pricing-badge" style="margin-bottom:12px"></div>
+<div class="form-grid cols-3" style="margin-bottom:12px">
+<button onclick="openCustomerPaymentModal('')" style="background:#059669;padding:11px">تسجيل دفعة / عربون</button>
+<button onclick="openFullCustomerStatement()" style="background:#1e3a8a;padding:11px">كشف حساب شامل</button>
+<button onclick="toggleCustCustomPricingBox()" style="background:var(--price-color);padding:11px">★ أسعار خاصة للزبون</button>
+</div>
+<div class="acc-dashboard" style="margin-bottom:0">
+<div class="acc-box" style="border-color:#f59e0b;background:#fffbeb"><h4 style="color:#b45309">بانتظار الفوترة</h4><div class="val" id="cw-unbilled-val" style="color:#d97706">0</div></div>
+<div class="acc-box" style="border-color:#dc2626;background:#fef2f2"><h4 style="color:#991b1b">إجمالي الفواتير</h4><div class="val" id="cw-total-billed" style="color:#dc2626">0</div></div>
+<div class="acc-box" style="border-color:#10b981;background:#f0fdf4"><h4 style="color:#065f46">إجمالي الدفعات</h4><div class="val" id="cw-total-paid" style="color:#059669">0</div></div>
+<div class="acc-box" style="border-color:#1e40af;background:#fff"><h4 style="color:#1e3a8a">الرصيد المتبقي</h4><div class="val" id="cw-net-balance" style="color:#1e40af">0</div></div>
+</div>
+</div>
+
+<div id="cw-custom-pricing-box" class="hidden" style="background:#f5f3ff;border:2px solid #8b5cf6;border-radius:10px;padding:14px;margin-bottom:15px">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+<h4 style="margin:0;color:#5b21b6">★ أسعار خاصة للزبون: <span id="cw-price-cust-name"></span></h4>
+<button onclick="resetCustomerCustomPricing()" style="width:auto;background:#ef4444;padding:6px 12px;font-size:.85rem">إلغاء السعر الخاص</button>
+</div>
+<div id="cw-custom-pricing-inputs"></div>
+<div class="form-grid cols-2" style="margin-top:10px;margin-bottom:0">
+<button onclick="saveCustomerCustomPricing()" style="background:#6d28d9;padding:12px">حفظ الأسعار الخاصة</button>
+<button onclick="toggleCustCustomPricingBox()" style="background:#64748b;padding:12px">إغلاق</button>
+</div>
+</div>
+
+<div class="sub-tabs cols-3">
+<div class="sub-tab active" id="subtab-btn-unbilled" onclick="switchCustSubTab('unbilled')">غير مفوترة (<span id="cw-unbilled-count" class="en-num">0</span>)</div>
+<div class="sub-tab" id="subtab-btn-invoices" onclick="switchCustSubTab('invoices')">الفواتير (<span id="cw-invoices-count" class="en-num">0</span>)</div>
+<div class="sub-tab" id="subtab-btn-ledger" onclick="switchCustSubTab('ledger')">سجل الدفعات والحساب</div>
+</div>
+
+<div id="cw-sub-unbilled">
+<div id="selected-billing-panel" class="billing-action-bar">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:10px;margin-bottom:10px">
+<div style="font-size:.94rem">حدد الطلبات لإصدار فاتورتها:</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button onclick="selectAllUnbilledOrders()" style="width:auto;background:#059669;border:1px solid #a7f3d0;padding:6px 12px;font-size:.85rem">✓ تحديد الكل</button>
+<button onclick="deselectAllUnbilledOrders()" style="width:auto;background:#dc2626;border:1px solid #fecaca;padding:6px 12px;font-size:.85rem">✕ إلغاء الكل</button>
+</div>
+</div>
+<div class="acc-dashboard" style="margin-bottom:12px">
+<div style="background:rgba(255,255,255,.14);padding:8px;border-radius:8px;text-align:center"><div style="font-size:.8rem">الطلبات</div><div id="sel-orders-count" class="en-num" style="font-size:1.25rem;font-weight:900">0</div></div>
+<div style="background:rgba(255,255,255,.14);padding:8px;border-radius:8px;text-align:center"><div style="font-size:.8rem">القطع</div><div id="sel-orders-qty" class="en-num" style="font-size:1.25rem;font-weight:900">0</div></div>
+<div style="background:rgba(255,255,255,.14);padding:8px;border-radius:8px;text-align:center"><div style="font-size:.8rem">الأمتار m2</div><div id="sel-orders-area" class="en-num" style="font-size:1.25rem;font-weight:900;direction:ltr">0.00</div></div>
+<div style="background:#fefce8;color:#b45309;padding:8px;border-radius:8px;text-align:center;border:2px solid #facc15"><div style="font-size:.8rem;font-weight:bold">إجمالي الفاتورة</div><div id="sel-orders-total" class="en-num" style="font-size:1.3rem;font-weight:900;direction:ltr">0</div></div>
+</div>
+<div class="form-grid cols-2" style="margin-bottom:0;align-items:flex-end">
+<div><label style="color:#fff;font-size:.88rem">دفعة / عربون الآن (اختياري):</label><input type="number" id="batch-paid-now" value="0" style="background:#fff;color:#065f46;font-weight:bold;text-align:center;direction:ltr"></div>
+<div><button onclick="issueInvoiceForSelectedOrders()" style="background:#10b981;color:#fff;padding:12px;font-size:1rem;border:2px solid #a7f3d0">إصدار الفاتورة النهائية</button></div>
+</div>
+</div>
+<div id="cw-unbilled-orders-list"></div>
+</div>
+
+<div id="cw-sub-invoices" class="hidden">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+<h4 style="margin:0;color:#0f766e">الفواتير والطلبات المفوترة</h4>
+<button onclick="openFullCustomerStatement()" style="width:auto;background:#1e3a8a;padding:8px 14px;font-size:.9rem">كشف حساب شامل</button>
+</div>
+<div id="cw-invoices-list"></div>
+</div>
+
+<div id="cw-sub-ledger" class="hidden">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+<h4 style="margin:0;color:#1e293b">سجل الدفعات وحركة الحساب</h4>
+<div style="display:flex;gap:6px">
+<button onclick="openCustomerPaymentModal('')" style="width:auto;background:#059669;padding:8px 14px;font-size:.88rem">إضافة دفعة</button>
+<button onclick="openFullCustomerStatement()" style="width:auto;background:#1e3a8a;padding:8px 14px;font-size:.88rem">كشف الحساب</button>
+</div>
+</div>
+<div class="table-wrap"><table class="data-table"><thead><tr><th>العملية</th><th>المستند</th><th>التاريخ</th><th>الحركة</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th><th>طباعة</th></tr></thead><tbody id="cw-ledger-tbody"></tbody></table></div>
+</div>
+</div>
+
+<div id="customer-empty-prompt" style="text-align:center;padding:28px 15px;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:10px;color:#64748b;font-weight:bold">اختر اسم الزبون من القائمة العلوية لعرض طلباته وفواتيره وكشف حسابه.</div>
+</div>
+
+<div id="tab-invoices-registry" class="card tab-section hidden">
+<h3 class="section-title" style="color:var(--inv-color)">سجل الفواتير العام</h3>
+<div class="form-grid cols-2" style="background:#f0fdfa;padding:12px;border-radius:8px;border:1px solid #99f6e4;margin-bottom:15px">
+<div><label style="color:#0f766e">ابحث برقم الفاتورة، الطلب، أو الزبون:</label><input type="text" id="search-global-invoices" placeholder="مثال: 1 أو اسم الزبون..." onkeyup="renderGlobalInvoicesRegistry()"></div>
+<div><label style="color:#0f766e">فلترة حسب التاريخ:</label><input type="date" id="date-global-invoices" onchange="renderGlobalInvoicesRegistry()"></div>
+</div>
+<div id="global-invoices-container"></div>
+</div>
+
+<div id="tab-pricing-setup" class="card tab-section hidden">
+<h3 class="section-title" style="color:var(--price-color)">قسم التسعير الشامل (<span id="pricing-curr-label" class="en-num">SYP</span>)</h3>
+<div id="global-pricing-form-container"></div>
+<button onclick="saveGlobalPricing()" style="background:var(--price-color);font-size:1.05rem;padding:13px">حفظ لائحة التسعير الشامل</button>
+</div>
+
+<div id="tab-journal" class="card tab-section hidden">
+<h3 class="section-title" style="color:var(--primary)">دفتر الصندوق</h3>
+<div style="background:#f8fafc;padding:12px;border-radius:10px;border:1px solid #cbd5e1;margin-bottom:15px">
+<div class="form-grid cols-3">
+<div><label>نوع الحركة</label>
+<select id="tx-type">
+<option value="تسديد دين لنا">قبض دفعة من زبون (+) [فاتورة قبض]</option>
+<option value="مصاريف">مصاريف عامة للمعمل (-) [إيصال دفع]</option>
+<option value="مشتريات">مشتريات مواد خام / ضيافة (-) [إيصال دفع]</option>
+<option value="فاتورة شراء آجلة">فاتورة شراء بالآجل من مورد</option>
+<option value="سداد دين علينا">دفعة لمورد (-) [إيصال دفع]</option>
+</select>
+</div>
+<div><label>المبلغ (123)</label><input type="number" id="tx-amount" step="any" placeholder="0" style="direction:ltr"></div>
+<div><label>العملة</label><select id="tx-currency"><option value="SYP">SYP</option><option value="USD">USD</option></select></div>
+</div>
+<div class="form-grid cols-3">
+<div><label>الاسم / الجهة</label><input type="text" id="tx-party" list="cust-datalist" placeholder="اسم الزبون أو المورد..."><datalist id="cust-datalist"></datalist></div>
+<div><label>التفاصيل</label><input type="text" id="tx-notes" placeholder="تفاصيل الحركة..."></div>
+<div><label>التاريخ</label><input type="date" id="tx-date"></div>
+</div>
+<button onclick="saveNewTransaction()" style="padding:12px">حفظ الحركة وإصدار المستند</button>
+</div>
+<div class="table-wrap"><table class="data-table"><thead><tr><th>العملية</th><th>المستند</th><th>التاريخ</th><th>النوع</th><th>الجهة</th><th>البيان</th><th>وارد (+)</th><th>صادر (-)</th><th>ذمم</th><th>طباعة</th><th>حذف</th></tr></thead><tbody id="journal-tbody"></tbody></table></div>
+</div>
+
+<div id="tab-workers-payroll" class="card tab-section hidden">
+<div class="section-title" style="color:var(--hr-color)">
+<span>إدارة العمال والدوام والرواتب <span style="font-size:.78rem;background:#dcfce7;color:#065f46;padding:3px 9px;border-radius:999px">مربوط مع المراقب ●</span></span>
+<button onclick="openQuickAdvanceModal()" style="width:auto;background:#dc2626;padding:7px 14px;font-size:.86rem">تسجيل سلفة عامل</button>
+</div>
+
+<div class="sub-tabs cols-5">
+<div class="sub-tab active" id="hr-sub-btn-report" onclick="switchHrSubTab('report')">كشف دوام موظف</div>
+<div class="sub-tab" id="hr-sub-btn-calc" onclick="switchHrSubTab('calc')">حاسبة الراتب والإضافي</div>
+<div class="sub-tab" id="hr-sub-btn-payroll" onclick="switchHrSubTab('payroll')">كشف الرواتب التلقائي</div>
+<div class="sub-tab" id="hr-sub-btn-attendance" onclick="switchHrSubTab('attendance')">تسجيل دوام (مزامن)</div>
+<div class="sub-tab" id="hr-sub-btn-settings" onclick="switchHrSubTab('settings')">إعدادات الدوام والرواتب</div>
+</div>
+
+<div id="hr-sub-report">
+<div style="background:#f8fafc;border:2px solid #4f46e5;border-radius:12px;padding:14px">
+<h4 style="margin:0 0 10px;color:#3730a3;font-size:1.05rem">كشف دوام الموظف (من السبت للخميس) - حساب الإضافي والتأخير والغياب وإعفاء الظروف</h4>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+<button type="button" onclick="setAttReportPreset('sat_to_thu_current')" style="width:auto;flex:1;background:#4f46e5;padding:8px;font-size:.82rem">هذا الأسبوع (سبت - خميس)</button>
+<button type="button" onclick="setAttReportPreset('sat_to_thu_prev')" style="width:auto;flex:1;background:#6366f1;padding:8px;font-size:.82rem">الأسبوع السابق (سبت - خميس)</button>
+<button type="button" onclick="setAttReportPreset('sat_to_fri_current')" style="width:auto;flex:1;background:#d97706;padding:8px;font-size:.82rem">سبت - جمعة (شامل الجمعة)</button>
+</div>
+<div class="form-grid cols-3" style="background:#eef2ff;padding:10px;border-radius:8px;border:1px solid #c7d2fe">
+<div><label style="color:#3730a3">اختر الموظف:</label><select id="rep-emp-select" onchange="renderEmployeeAttendanceReport()" style="font-weight:bold;border-color:#4f46e5"></select></div>
+<div><label style="color:#3730a3">من تاريخ (السبت):</label><input type="date" id="rep-start-date" onchange="renderEmployeeAttendanceReport()"></div>
+<div><label style="color:#3730a3">إلى تاريخ (الخميس):</label><input type="date" id="rep-end-date" onchange="renderEmployeeAttendanceReport()"></div>
+</div>
+<div id="emp-att-report-body"><div style="text-align:center;padding:22px;color:#64748b;font-weight:bold">اختر اسم الموظف من القائمة لعرض كشف دوامه التفصيلي.</div></div>
+</div>
+</div>
+
+<div id="hr-sub-calc" class="hidden">
+<div class="calc-panel">
+<h4 style="margin:0 0 10px;color:#3730a3;font-size:1.05rem">حاسبة الراتب والإضافي وعمل يوم الجمعة</h4>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+<button type="button" onclick="setCalcWeekPreset('sat_to_thu_current')" style="width:auto;flex:1;background:#4f46e5;padding:8px;font-size:.82rem">سبت - خميس (الحالي)</button>
+<button type="button" onclick="setCalcWeekPreset('sat_to_fri_current')" style="width:auto;flex:1;background:#d97706;padding:8px;font-size:.82rem">سبت - جمعة (شامل إضافي الجمعة)</button>
+<button type="button" onclick="setCalcWeekPreset('sat_to_thu_prev')" style="width:auto;flex:1;background:#6366f1;padding:8px;font-size:.82rem">الأسبوع السابق</button>
+</div>
+<div class="form-grid cols-3" style="background:#eef2ff;padding:10px;border-radius:8px;border:1px solid #c7d2fe">
+<div><label style="color:#3730a3">اختر العامل:</label><select id="calc-emp-select" onchange="loadWorkerIntoCalculator()" style="font-weight:bold;border-color:#6366f1"></select></div>
+<div><label style="color:#3730a3">من تاريخ:</label><input type="date" id="calc-start-date" onchange="loadWorkerIntoCalculator()"></div>
+<div><label style="color:#3730a3">إلى تاريخ:</label><input type="date" id="calc-end-date" onchange="loadWorkerIntoCalculator()"></div>
+</div>
+<div id="calc-already-paid-banner" class="already-paid-banner hidden"></div>
+<div id="calc-att-hint" class="hidden" style="background:#e0f2fe;border:1px solid #7dd3fc;color:#0369a1;padding:8px 12px;border-radius:8px;margin-bottom:10px;font-size:.86rem;font-weight:bold;line-height:1.6"></div>
+
+<div class="form-grid cols-4">
+<div><label>اليومية:</label><input type="number" id="calc-daily-wage" placeholder="100000" oninput="onDailyWageOrAbsentChange()" style="direction:ltr;font-weight:bold;text-align:center;border-color:#4f46e5"></div>
+<div><label>ساعات اليوم:</label><input type="number" id="calc-std-hours" value="8" step="0.5" oninput="recalcSalaryCalculator()" style="direction:ltr;font-weight:bold;text-align:center"></div>
+<div><label>أيام العمل العادية:</label><input type="number" id="calc-days-worked" value="6" step="0.5" oninput="recalcSalaryCalculator()" style="direction:ltr;font-weight:bold;text-align:center"></div>
+<div><label>العملة:</label><select id="calc-currency" onchange="recalcSalaryCalculator()" style="font-weight:bold"><option value="SYP">SYP</option><option value="USD">USD</option></select></div>
+</div>
+
+<div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:12px;margin-bottom:10px">
+<div class="form-grid cols-2" style="margin-bottom:6px">
+<div><label style="color:#92400e">عدد أيام الجمعة (عمل إضافي):</label><input type="number" id="calc-friday-days" value="0" step="0.5" oninput="recalcSalaryCalculator()" style="direction:ltr;font-weight:900;font-size:1.1rem;text-align:center;border:2px solid #d97706"></div>
+<div><label style="color:#92400e">حساب يوم الجمعة (تعديل حر):</label><input type="number" id="calc-friday-mult" value="1.5" step="0.25" oninput="syncFriButtonsUI();recalcSalaryCalculator()" style="direction:ltr;font-weight:900;font-size:1.1rem;text-align:center;border:2px solid #b45309;color:#b45309"></div>
+</div>
+<label style="color:#92400e;font-size:.82rem;margin-bottom:2px">اختر حساب يوم الجمعة بضغطة زر:</label>
+<div class="ot-rate-btns">
+<button type="button" class="fri-btn" data-fmult="1" onclick="setFridayMultiplier(1)">يوم بيوم (x1)</button>
+<button type="button" class="fri-btn active" data-fmult="1.5" onclick="setFridayMultiplier(1.5)">يوم بيوم ونص (x1.5)</button>
+<button type="button" class="fri-btn" data-fmult="2" onclick="setFridayMultiplier(2)">يوم بيومين (x2)</button>
+<button type="button" class="fri-btn" data-fmult="2.5" onclick="setFridayMultiplier(2.5)">يومين ونص (x2.5)</button>
+</div>
+</div>
+
+<div style="background:#eef2ff;border:1.5px solid #a5b4fc;border-radius:10px;padding:12px;margin-bottom:10px">
+<div class="form-grid cols-2" style="margin-bottom:6px">
+<div><label style="color:#3730a3">ساعات الإضافي العادية:</label><input type="number" id="calc-ot-hours" value="0" step="0.25" oninput="recalcSalaryCalculator()" style="direction:ltr;font-weight:900;font-size:1.1rem;text-align:center;border:2px solid #6366f1"></div>
+<div><label style="color:#3730a3">معامل ساعات الإضافي:</label><input type="number" id="calc-ot-mult" value="1.5" step="0.25" oninput="syncOtButtonsUI();recalcSalaryCalculator()" style="direction:ltr;font-weight:900;font-size:1.1rem;text-align:center;border:2px solid #4f46e5;color:#4f46e5"></div>
+</div>
+<div class="ot-rate-btns">
+<button type="button" class="ot-btn" data-mult="1" onclick="setOtMultiplier(1)">ساعة بساعة (x1)</button>
+<button type="button" class="ot-btn active" data-mult="1.5" onclick="setOtMultiplier(1.5)">ساعة ونص (x1.5)</button>
+<button type="button" class="ot-btn" data-mult="2" onclick="setOtMultiplier(2)">ساعة بساعتين (x2)</button>
+<button type="button" class="ot-btn" data-mult="1.25" onclick="setOtMultiplier(1.25)">ساعة وربع (x1.25)</button>
+</div>
+</div>
+
+<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:10px">
+<div class="form-grid cols-4" style="margin-bottom:0">
+<div><label style="color:#991b1b">أيام الغياب:</label><input type="number" id="calc-absent-days" value="0" step="0.5" oninput="onDailyWageOrAbsentChange()" style="direction:ltr;text-align:center;font-weight:bold;color:#dc2626"></div>
+<div><label style="color:#991b1b">خصم الغياب (-):</label><input type="number" id="calc-absent-deduct" value="0" oninput="recalcSalaryCalculator()" style="direction:ltr;text-align:center;font-weight:bold;color:#dc2626"></div>
+<div><label style="color:#b91c1c">السلف المسحوبة (-):</label><input type="number" id="calc-advances" value="0" oninput="recalcSalaryCalculator()" style="direction:ltr;text-align:center;font-weight:bold;color:#dc2626"></div>
+<div><label style="color:#b91c1c">خصومات أخرى (-):</label><input type="number" id="calc-other-deduct" value="0" oninput="recalcSalaryCalculator()" style="direction:ltr;text-align:center;font-weight:bold;color:#dc2626"></div>
+</div>
+</div>
+
+<div class="form-grid cols-2">
+<div><label style="color:#059669">مكافأة / إكرامية (+):</label><input type="number" id="calc-bonus" value="0" oninput="recalcSalaryCalculator()" style="direction:ltr;text-align:center;font-weight:bold;color:#059669"></div>
+<div><label>ملاحظات قسيمة الراتب:</label><input type="text" id="calc-notes" placeholder="مثال: راتب الأسبوع..."></div>
+</div>
+
+<div class="calc-summary-box">
+<div class="calc-row"><span>أجر الساعة العادية:</span><span id="res-hourly-rate" class="en-num" style="direction:ltr;color:#334155">0</span></div>
+<div class="calc-row"><span>الراتب الأساسي (<span id="res-days-lbl" class="en-num">0</span> أيام):</span><span id="res-base-pay" class="en-num" style="direction:ltr;color:#1e40af">0</span></div>
+<div class="calc-row"><span>إضافي يوم الجمعة (<span id="res-fri-days-lbl" class="en-num">0</span> يوم x <span id="res-fri-mult-lbl" class="en-num">1.5</span>):</span><span id="res-fri-pay" class="en-num" style="direction:ltr;color:#b45309">0</span></div>
+<div class="calc-row"><span>ساعات الإضافي (<span id="res-ot-lbl" class="en-num">0</span> ساعة x <span id="res-mult-lbl" class="en-num">1.5</span>):</span><span id="res-ot-pay" class="en-num" style="direction:ltr;color:#4f46e5">0</span></div>
+<div class="calc-row"><span>المكافآت (+):</span><span id="res-bonus-pay" class="en-num" style="direction:ltr;color:#059669">0</span></div>
+<div class="calc-row"><span>خصم الغياب (<span id="res-abs-lbl" class="en-num">0</span> يوم) (-):</span><span id="res-abs-pay" class="en-num" style="direction:ltr;color:#dc2626">0</span></div>
+<div class="calc-row"><span>السلف المسحوبة (-):</span><span id="res-adv-pay" class="en-num" style="direction:ltr;color:#dc2626">0</span></div>
+<div class="calc-row"><span>خصومات أخرى (-):</span><span id="res-other-pay" class="en-num" style="direction:ltr;color:#dc2626">0</span></div>
+<div class="calc-row"><span>صافي الراتب:</span><span id="res-net-pay" class="en-num" style="direction:ltr;font-size:1.45rem;font-weight:900;color:#065f46">0</span></div>
+</div>
+
+<div class="form-grid cols-2" style="margin-top:12px;margin-bottom:0">
+<button onclick="paySalaryFromCalculator()" style="background:#059669;padding:14px;font-size:1.05rem">صرف الراتب الآن (خصم من الصندوق + قسيمة)</button>
+<button onclick="previewCalculatorPayslip()" style="background:#0284c7;padding:14px;font-size:1rem">معاينة قسيمة الراتب قبل الصرف</button>
+</div>
+</div>
+</div>
+
+<div id="hr-sub-payroll" class="hidden">
+<div style="background:#f0fdf4;border:2px solid #86efac;padding:12px;border-radius:10px">
+<h4 style="margin:0 0 10px;color:#065f46">كشف الرواتب التلقائي (السبت - الخميس + إضافي الجمعة)</h4>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+<button onclick="setPayrollPeriodPreset('sat_to_thu_current')" style="width:auto;flex:1;background:#4f46e5;padding:8px;font-size:.82rem">سبت - خميس</button>
+<button onclick="setPayrollPeriodPreset('sat_to_fri_current')" style="width:auto;flex:1;background:#d97706;padding:8px;font-size:.82rem">سبت - جمعة (مع الجمعة)</button>
+<button onclick="setPayrollPeriodPreset('sat_to_thu_prev')" style="width:auto;flex:1;background:#6366f1;padding:8px;font-size:.82rem">الأسبوع السابق</button>
+<button onclick="setPayrollPeriodPreset('this_month')" style="width:auto;flex:1;background:#0284c7;padding:8px;font-size:.82rem">هذا الشهر</button>
+</div>
+<div class="form-grid cols-3" style="background:#fff;padding:10px;border-radius:8px;border:1px solid #bbf7d0">
+<div><label>من تاريخ (السبت)</label><input type="date" id="payroll-start-date" onchange="renderWorkersPayrollTable()"></div>
+<div><label>إلى تاريخ (الخميس/الجمعة)</label><input type="date" id="payroll-end-date" onchange="renderWorkersPayrollTable()"></div>
+<div><label style="color:#b45309">معامل يوم الجمعة بالكشف:</label><input type="number" id="payroll-fri-mult" value="1.5" step="0.25" oninput="renderWorkersPayrollTable()" style="direction:ltr;text-align:center;font-weight:bold;border-color:#f59e0b;color:#b45309"></div>
+</div>
+<div class="table-wrap"><table class="data-table"><thead><tr style="background:#047857"><th>#</th><th>العامل</th><th>حضور</th><th>جمعة</th><th>غياب</th><th>إضافي</th><th>تأخير</th><th>المستحق</th><th>السلف (-)</th><th>الصافي</th><th>إجراء</th></tr></thead><tbody id="workers-payroll-tbody"></tbody></table></div>
+</div>
+</div>
+
+<div id="hr-sub-attendance" class="hidden">
+<div style="background:#eff6ff;border:2px solid #93c5fd;padding:12px;border-radius:10px">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+<div><h4 style="margin:0;color:#1e3a8a">تسجيل حضور وانصراف العمال (مزامن مع تطبيق المراقب)</h4><div style="font-size:.84rem;color:#475569">أي تسجيل هنا ينعكس فوراً على تطبيق مراقب الدوام والعكس صحيح.</div></div>
+<div style="min-width:170px"><input type="date" id="backup-att-date" onchange="renderBackupAttendanceList()" style="font-weight:bold;border-color:#3b82f6"></div>
+</div>
+<div id="backup-friday-banner" class="friday-banner hidden">تنبيه: التاريخ المختار هو <b>يوم الجمعة (عطلة رسمية)</b> - أي عامل يُسجل حضوره اليوم يُحسب تلقائياً كـ <b>عمل إضافي جمعة</b>، ومن لا يحضر لا يُحسب عليه غياب.</div>
+<div id="backup-att-list"></div>
+</div>
+</div>
+
+<div id="hr-sub-settings" class="hidden">
+<div style="background:#eef2ff;border:2px solid #a5b4fc;padding:12px;border-radius:10px">
+<h4 style="margin-top:0;color:#3730a3">إعدادات الدوام والرواتب الأساسية</h4>
+<div class="bulk-shift-box">
+<div style="font-weight:900;color:#3730a3;margin-bottom:8px;font-size:.95rem">تحديد وتطبيق دوام موحّد لجميع الموظفين دفعة واحدة:</div>
+<div class="form-grid cols-4" style="margin-bottom:10px">
+<div><label>بدء الدوام للكل:</label><input type="time" id="bulk-shift-start" value="08:00" onchange="onBulkShiftTimeChange()" style="direction:ltr;font-weight:bold;border-color:#4f46e5"></div>
+<div><label>انتهاء الدوام للكل:</label><input type="time" id="bulk-shift-end" value="16:00" onchange="onBulkShiftTimeChange()" style="direction:ltr;font-weight:bold;border-color:#4f46e5"></div>
+<div><label>ساعات اليوم للكل:</label><input type="number" id="bulk-daily-hours" value="8" step="0.5" style="direction:ltr;text-align:center;font-weight:bold;border-color:#4f46e5"></div>
+<div><label>سماحية التأخير (دقيقة):</label><input type="number" id="bulk-grace-mins" value="15" style="direction:ltr;text-align:center;font-weight:bold;border-color:#4f46e5"></div>
+</div>
+<button onclick="applyBulkShiftSettings()" style="background:#4f46e5;padding:11px;font-size:.96rem">✓ تطبيق إعدادات الدوام هذه على جميع الموظفين الآن</button>
+</div>
+<div style="font-size:.83rem;color:#475569;margin-bottom:8px;font-weight:bold">يمكنك أيضاً تعديل الراتب أو تخصيص دوام مختلف لأي عامل من الجدول أدناه:</div>
+<div class="table-wrap"><table class="data-table"><thead><tr style="background:#4f46e5"><th>#</th><th>العامل</th><th>نظام الراتب</th><th>القيمة</th><th>العملة</th><th>بدء الدوام</th><th>انتهاء الدوام</th><th>ساعات/يوم</th><th>سماحية(د)</th><th>أجر الساعة</th><th>حفظ</th></tr></thead><tbody id="workers-settings-tbody"></tbody></table></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="logo-settings-modal" class="modal">
+<div class="modal-content" style="text-align:center">
+<h3 style="color:#4f46e5;margin-top:0">لوغو الشركة (مشترك مع شؤون العمال)</h3>
+<div style="background:#f8fafc;border:2px dashed #cbd5e1;border-radius:10px;padding:12px;margin-bottom:12px">
+<img id="modal-logo-preview" style="max-height:90px;max-width:200px;object-fit:contain;display:none;margin:0 auto" alt="Logo Preview">
+<div id="modal-logo-empty" style="color:#64748b;font-size:.88rem">لا يوجد لوغو محفوظ بعد - اختر صورة اللوغو ليظهر على التطبيق والفواتير والكشوفات.</div>
+</div>
+<div style="text-align:right;margin-bottom:10px"><label>اسم الشركة / المعمل:</label><input type="text" id="company-name-input" placeholder="شركة عباس للزجاج / أبو حسام للزجاج"></div>
+<div style="text-align:right;margin-bottom:14px"><label>اختر صورة اللوغو من الجهاز:</label><input type="file" id="company-logo-file" accept="image/*" onchange="onPickCompanyLogo(event)"></div>
+<div class="form-grid cols-2" style="margin-bottom:0">
+<button onclick="saveCompanyLogoSettings()" style="background:#059669">حفظ اللوغو</button>
+<button onclick="document.getElementById('logo-settings-modal').style.display='none'" style="background:#64748b">إغلاق</button>
+</div>
+</div>
+</div>
+
+<div id="cust-payment-modal" class="modal">
+<div class="modal-content">
+<h3 style="color:#059669;margin-top:0">تسجيل دفعة / عربون: <span id="pay-modal-cust-name"></span></h3>
+<label>ربط الدفعة بطلب (اختياري):</label><select id="pay-modal-link-order" style="margin-bottom:10px;font-weight:bold"></select>
+<label>المبلغ المستلم (123):</label><input type="number" id="pay-modal-amount" step="any" placeholder="0" style="margin-bottom:10px;direction:ltr;font-weight:bold;font-size:1.15rem;text-align:center">
+<label>ملاحظات الدفعة:</label><input type="text" id="pay-modal-notes" placeholder="دفعة نقدية / عربون..." style="margin-bottom:15px">
+<div class="form-grid cols-2" style="margin-bottom:0">
+<button onclick="saveCustomerDirectPayment()" style="background:#059669">حفظ الدفعة</button>
+<button onclick="document.getElementById('cust-payment-modal').style.display='none'" style="background:#ef4444">إلغاء</button>
+</div>
+</div>
+</div>
+
+<div id="advance-modal" class="modal">
+<div class="modal-content">
+<h3 style="color:var(--hr-color);margin-top:0">تسجيل سلفة لعامل</h3>
+<label>اختر العامل</label><select id="adv-emp-select" style="margin-bottom:10px;font-weight:bold"></select>
+<label>المبلغ (123)</label><input type="number" id="adv-amount" step="any" placeholder="0" style="margin-bottom:10px;direction:ltr;text-align:center">
+<label>العملة</label><select id="adv-currency" style="margin-bottom:10px"><option value="SYP">SYP</option><option value="USD">USD</option></select>
+<label>ملاحظات</label><input type="text" id="adv-notes" placeholder="سلفة على الراتب..." style="margin-bottom:15px">
+<div class="form-grid cols-2" style="margin-bottom:0">
+<button onclick="saveWorkerAdvance()" style="background:var(--hr-color)">صرف السلفة</button>
+<button onclick="document.getElementById('advance-modal').style.display='none'" style="background:#ef4444">إلغاء</button>
+</div>
+</div>
+</div>
+
+<div id="op-success-modal" class="modal" style="z-index:9500">
+<div class="modal-content" style="text-align:center;border:3px solid #059669;max-width:430px">
+<div style="font-size:2.6rem;line-height:1;margin-bottom:6px;color:#059669">✓</div>
+<h2 style="color:#065f46;margin:0 0 12px;font-size:1.4rem">تمت العملية بنجاح</h2>
+<div id="op-success-details" style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:12px;margin-bottom:15px;font-size:.95rem;line-height:1.8;text-align:right"></div>
+<div class="form-grid cols-2" style="margin-bottom:0">
+<button id="op-success-print-btn" style="background:#0284c7;padding:12px">معاينة وطباعة</button>
+<button onclick="closeOpSuccessModal()" style="background:#059669;padding:12px">✓ موافق</button>
+</div>
+</div>
+</div>
+
+<div id="fixed-doc-preview">
+<div class="doc-preview-topbar">
+<button onclick="executeDocPrint()" style="background:#059669;color:#fff">طباعة / حفظ PDF</button>
+<button onclick="closeFixedDocPreview()" style="background:#ef4444;color:#fff">إغلاق ✕</button>
+</div>
+<div class="doc-preview-stage" id="doc-preview-stage"><div id="doc-scale-box"></div></div>
+</div>
+<div id="print-area"></div>
+
+<script>
+const SUPABASE_URL='https://kxesvjrvbbzgulyuddfv.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_F0Yy4QFZM5y4YkHMtb8YKg_WnOkGJKA';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const ARABIC_DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function toEnDigits(s){if(s===null||s===undefined)return '';return String(s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))}
+function fmtNum(v,dec=null){let n=Number(toEnDigits(v));if(isNaN(n))n=0;if(dec!==null)return toEnDigits(n.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}));return toEnDigits(n.toLocaleString('en-US',{maximumFractionDigits:2}))}
+function fmtMinsToHM(t){let m=Math.max(0,Math.round(Number(t)||0)),h=Math.floor(m/60),r=m%60;if(h===0&&r===0)return '0';if(h===0)return r+'m';if(r===0)return h+'h';return h+'h '+r+'m'}
+document.addEventListener('input',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')){let c=toEnDigits(e.target.value);if(e.target.value!==c)e.target.value=c}});
+
+async function sendCompanyNotification({category='finance',department='محاسبة',actor_name='',title='',summary='',ref_code='',amount=0,details={}}){
+try{await supabaseClient.from('company_notifications').insert([{category,department,actor_name:actor_name||(currentUser?currentUser.name:'النظام'),title:toEnDigits(title),summary:toEnDigits(summary),ref_code:toEnDigits(ref_code),amount:Number(amount)||0,details,is_read:false}])}catch(e){console.warn('Notification error:',e)}
+}
+
+let sysCompanyInfo=JSON.parse(localStorage.getItem('sys_company_info'))||{name:'أبو حسام للزجاج'};
+let tempPickedLogo='';
+function getCompanyLogo(){let info=JSON.parse(localStorage.getItem('sys_company_info'))||sysCompanyInfo||{};return info.logo||info.logoUrl||info.image||info.img||localStorage.getItem('sys_company_logo')||localStorage.getItem('hr_company_logo')||localStorage.getItem('company_logo')||localStorage.getItem('factory_logo')||''}
+function getDocLogoHtml(sz=48){let s=getCompanyLogo();if(!s)return '';return `<img src="${s}" alt="Logo" style="height:${sz}px;width:${sz}px;object-fit:contain;border-radius:8px;border:1px solid #cbd5e1;background:#fff;padding:2px;flex-shrink:0">`}
+function applyCompanyBranding(){
+sysCompanyInfo=JSON.parse(localStorage.getItem('sys_company_info'))||sysCompanyInfo||{name:'أبو حسام للزجاج'};
+let logo=getCompanyLogo(),compName=sysCompanyInfo.name||'أبو حسام للزجاج',hImg=document.getElementById('header-logo-img'),lImg=document.getElementById('login-logo-img');
+if(hImg){if(logo){hImg.src=logo;hImg.classList.remove('hidden')}else hImg.classList.add('hidden')}
+if(lImg){if(logo){lImg.src=logo;lImg.classList.remove('hidden')}else lImg.classList.add('hidden')}
+let hTitle=document.getElementById('header-company-title');if(hTitle)hTitle.innerText=compName+' - المحاسبة والرواتب';
+}
+function openLogoSettingsModal(){
+tempPickedLogo=getCompanyLogo();document.getElementById('company-name-input').value=sysCompanyInfo.name||'أبو حسام للزجاج';document.getElementById('company-logo-file').value='';
+let p=document.getElementById('modal-logo-preview'),em=document.getElementById('modal-logo-empty');
+if(tempPickedLogo){p.src=tempPickedLogo;p.style.display='block';em.style.display='none'}else{p.style.display='none';em.style.display='block'}
+document.getElementById('logo-settings-modal').style.display='flex';
+}
+function onPickCompanyLogo(ev){let f=ev.target.files&&ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{tempPickedLogo=e.target.result;let p=document.getElementById('modal-logo-preview'),em=document.getElementById('modal-logo-empty');p.src=tempPickedLogo;p.style.display='block';em.style.display='none'};r.readAsDataURL(f)}
+function saveCompanyLogoSettings(){
+let n=document.getElementById('company-name-input').value.trim()||'أبو حسام للزجاج';sysCompanyInfo.name=n;
+if(tempPickedLogo){sysCompanyInfo.logo=tempPickedLogo;localStorage.setItem('sys_company_logo',tempPickedLogo)}
+localStorage.setItem('sys_company_info',JSON.stringify(sysCompanyInfo));applyCompanyBranding();document.getElementById('logo-settings-modal').style.display='none';alert('تم حفظ اللوغو واسم الشركة بنجاح ✓');
+}
+
+const PRICING_FIELDS=[
+{section:'1. الزجاج الشفاف العادي (1 m2)',items:[{key:'normal_4',label:'عادي 4 ملم'},{key:'normal_6',label:'عادي 6 ملم'},{key:'normal_8',label:'عادي 8 ملم'},{key:'normal_10',label:'عادي 10 ملم'},{key:'normal_12',label:'عادي 12 ملم'},{key:'normal_other',label:'سماكة أخرى'}]},
+{section:'2. الزجاج الشفاف السيكوريت (1 m2)',items:[{key:'securit_4',label:'سيكوريت 4 ملم'},{key:'securit_6',label:'سيكوريت 6 ملم'},{key:'securit_8',label:'سيكوريت 8 ملم'},{key:'securit_10',label:'سيكوريت 10 ملم'},{key:'securit_12',label:'سيكوريت 12 ملم'},{key:'securit_other',label:'سماكة أخرى'}]},
+{section:'3. الألوان (زيادة على 1 m2)',items:[{key:'color_green',label:'الأخضر'},{key:'color_blue',label:'الأزرق'},{key:'color_reflective',label:'العاكس'},{key:'color_bronze',label:'البرونز'},{key:'color_fume',label:'الفيميه/الرمادي'},{key:'color_pearl',label:'اللؤلؤي'},{key:'color_patterned',label:'المحجر/المبزر'},{key:'color_wired',label:'المسلح'},{key:'color_stained',label:'المعشق'}]},
+{section:'4. الدبل والتربلكس (1 m2)',items:[{key:'srv_double_sqm',label:'دبل عادي'},{key:'srv_structural_double_sqm',label:'دبل إنشائي'},{key:'srv_triplex_sqm',label:'تربلكس'}]},
+{section:'5. السبايسر (1 m2)',items:[{key:'spacer_6',label:'6 ملم'},{key:'spacer_8',label:'8 ملم'},{key:'spacer_10',label:'10 ملم'},{key:'spacer_12',label:'12 ملم'},{key:'spacer_14',label:'14 ملم'},{key:'spacer_16',label:'16 ملم'},{key:'spacer_other',label:'أخرى'}]},
+{section:'6. إضافات (رمل، رسم، تركيب، توصيل)',items:[{key:'srv_sand_sqm',label:'رمل (1 m2)'},{key:'srv_draw_sqm',label:'رسم (1 m2)'},{key:'srv_install_sqm',label:'تركيب (1 m2)'},{key:'srv_delivery_sqm',label:'توصيل (1 m2)'}]},
+{section:'7. أجور للغير',items:[{key:'labor_securit_sqm',label:'فرن سيكوريت (1 m2)'},{key:'srv_grind_m',label:'جلخ (م.ط)'},{key:'srv_hole_pc',label:'تخريق (للقطعة)'}]}
+];
+
+let db={customers:[],employees:[],orders:[],attendance:[],accounting:[],invoices:[],salary_configs:{},pricing_catalog:{SYP:{},USD:{}},customer_pricing:{},att_excuses:{},seq_counters:{lastOpSeq:0,lastInvSeq:0,lastRecSeq:0,lastPayslipSeq:0,lastEmpSeq:0}};
+let pendingAttSync=JSON.parse(localStorage.getItem('att_pending_sync'))||{};
+let currentUser=null,activeCurrency='SYP',selectedCustomerId='',selectedUnbilledOrderIds=new Set();
+
+function getTodayStr(){return formatDateObj(new Date())}
+function getNowTimeStr(){let d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function formatDateObj(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function normalizeString(s){return s?s.replace(/أ|إ|آ/g,'ا').trim():''}
+function getDateRangeArray(s,e){let res=[],c=new Date(s+'T00:00:00'),en=new Date(e+'T00:00:00');if(isNaN(c)||isNaN(en)||c>en)return res;let g=0;while(c<=en&&g<40){res.push({dateStr:formatDateObj(c),dayIndex:c.getDay(),dayName:ARABIC_DAYS[c.getDay()]});c.setDate(c.getDate()+1);g++}return res}
+function getSatWeekRange(mode){let now=new Date(),day=now.getDay(),diff=(day===6)?0:(day+1),sat=new Date(now);sat.setDate(now.getDate()-diff);if(mode==='sat_to_thu_prev')sat.setDate(sat.getDate()-7);let end=new Date(sat);end.setDate(sat.getDate()+(mode==='sat_to_fri_current'?6:5));return{start:formatDateObj(sat),end:formatDateObj(end)}}
+
+function findExistingSalaryPaymentForPeriod(emp,s,e){
+if(!emp||!s||!e)return null;let nn=normalizeString(emp.name).toLowerCase();
+return db.accounting.find(tx=>{
+if(tx.type!=='صرف راتب')return false;
+let same=(tx.empId!==undefined&&tx.empId!==null&&String(tx.empId)===String(emp.id))||(normalizeString(tx.party).toLowerCase()===nn);
+if(!same)return false;
+if(tx.payslipSnapshot&&tx.payslipSnapshot.startDate&&tx.payslipSnapshot.endDate)return tx.payslipSnapshot.startDate<=e&&tx.payslipSnapshot.endDate>=s;
+return tx.date>=s&&tx.date<=e;
+})||null;
+}
+function showDuplicateSalaryError(emp,ex){
+let pNum=toEnDigits(ex.docSeq||'-'),opNum=toEnDigits(ex.opSeq||'-'),pDate=toEnDigits(ex.date||'-'),pAmt=fmtNum(ex.amount||0),pCur=ex.currency||'SYP';
+let pRange=(ex.payslipSnapshot&&ex.payslipSnapshot.startDate)?`\nالفترة المدفوعة: ${toEnDigits(ex.payslipSnapshot.startDate)} إلى ${toEnDigits(ex.payslipSnapshot.endDate)}`:'';
+alert(`خطأ: لا يمكن صرف الراتب مرة ثانية!\n\nالعامل (${emp.name}) قبض راتبه بالفعل عن هذا الأسبوع استناداً إلى قسيمة الراتب رقم #${pNum} (عملية #${opNum}).\nتاريخ الصرف: ${pDate}\nالمبلغ المصروف: ${pAmt} ${pCur}${pRange}`);
+}
+
+function findAttRecord(empId,d){let sid=String(empId);return db.attendance.find(a=>String(a.empId)===sid&&a.date===d)}
+function mergeAttendanceRows(rem,loc){
+let m=new Map();
+if(Array.isArray(rem))rem.forEach(r=>m.set(String(r.empId)+'_'+r.date,r));
+if(Array.isArray(loc))loc.forEach(r=>{let k=String(r.empId)+'_'+r.date;if(!m.has(k))m.set(k,r)});
+pendingAttSync=JSON.parse(localStorage.getItem('att_pending_sync'))||pendingAttSync||{};
+Object.values(pendingAttSync).forEach(r=>m.set(String(r.empId)+'_'+r.date,r));
+return Array.from(m.values());
+}
+async function pushAttendanceRecordSafe(rec){
+let full={id:rec.id,empId:rec.empId,empName:rec.empName,date:rec.date,checkIn:rec.checkIn||'',checkOut:rec.checkOut||'',notes:rec.notes||'',recordedBy:rec.recordedBy||(currentUser?currentUser.name:'محاسبة')};
+let res=await supabaseClient.from('attendance').upsert([full]);if(!res.error)return true;
+let core={id:rec.id,empId:rec.empId,empName:rec.empName,date:rec.date,checkIn:rec.checkIn||'',checkOut:rec.checkOut||'',notes:rec.notes||''};
+let retry=await supabaseClient.from('attendance').upsert([core]);return !retry.error;
+}
+
+function getExcuseKey(empId,d){return String(empId)+'_'+d}
+function getAttendanceExcuse(empId,d,rec=null){let sv=db.att_excuses[getExcuseKey(empId,d)]||{};return{excuseAbsent:!!(sv.excuseAbsent||(rec&&rec.excuseAbsent)),excuseLate:!!(sv.excuseLate||(rec&&rec.excuseLate)),reason:sv.reason||(rec&&rec.excuseReason)||''}}
+function toggleAttendanceExcuse(empId,d,field){
+let k=getExcuseKey(empId,d),cur=db.att_excuses[k]||{excuseAbsent:false,excuseLate:false,reason:''},nv=!cur[field];
+if(nv){let def=field==='excuseAbsent'?'ظرف / عطلة معفاة':'تأخير معفى',ur=prompt(field==='excuseAbsent'?'اكتب سبب إزالة الغياب (ظرف / عطلة / طبي...):':'اكتب سبب إزالة التأخير (اختياري):',cur.reason||def);if(ur===null)return;cur.reason=ur.trim()||def}
+cur[field]=nv;db.att_excuses[k]=cur;localStorage.setItem('sys_att_excuses',JSON.stringify(db.att_excuses));
+renderEmployeeAttendanceReport();renderWorkersPayrollTable();if(String(document.getElementById('calc-emp-select').value)===String(empId))loadWorkerIntoCalculator();
+}
+
+function determineDocTypeForTx(tx){if(tx.docType)return tx.docType;if(['فاتورة مبيع','تسديد دين لنا','مبيع نقدي'].includes(tx.type))return 'فاتورة';if(['صرف راتب','سلفة عامل'].includes(tx.type)||tx.partyCategory==='worker')return 'قسيمة راتب';return 'إيصال'}
+function ensureAllSequentialNumbers(){
+let sc=JSON.parse(localStorage.getItem('sys_seq_counters'))||{},fixed=JSON.parse(localStorage.getItem('att_fixed_emp_seq_map'))||{},hrLoc=JSON.parse(localStorage.getItem('sys_emp_profiles_local'))||{};
+db.seq_counters={lastOpSeq:Number(sc.lastOpSeq)||0,lastInvSeq:Number(sc.lastInvSeq)||0,lastRecSeq:Number(sc.lastRecSeq)||0,lastPayslipSeq:Number(sc.lastPayslipSeq)||0,lastEmpSeq:Number(sc.lastEmpSeq)||0};
+db.employees.forEach(e=>{
+let hr=hrLoc[String(e.id)]||{};
+let dbSeq=(e.empSeq!==undefined&&e.empSeq!==null)?e.empSeq:((e.emp_seq!==undefined&&e.emp_seq!==null)?e.emp_seq:((hr.empSeq!==undefined&&hr.empSeq!==null)?hr.empSeq:fixed[String(e.id)]));
+if(dbSeq!==undefined&&dbSeq!==null&&String(dbSeq).trim()!==''){e.empSeq=Number(toEnDigits(dbSeq))||dbSeq;fixed[String(e.id)]=e.empSeq}
+});
+let maxEmp=db.seq_counters.lastEmpSeq;
+db.employees.forEach(e=>{if(e.id!=='sup_1'&&Number(e.empSeq)>maxEmp)maxEmp=Number(e.empSeq)});
+db.employees.forEach(e=>{if(!e.empSeq){maxEmp++;e.empSeq=maxEmp;fixed[String(e.id)]=e.empSeq}else e.empSeq=Number(toEnDigits(e.empSeq))||e.empSeq});
+db.employees.sort((a,b)=>(Number(a.empSeq)||9999)-(Number(b.empSeq)||9999));
+db.seq_counters.lastEmpSeq=maxEmp;localStorage.setItem('att_fixed_emp_seq_map',JSON.stringify(fixed));
+let mOp=db.seq_counters.lastOpSeq,mInv=db.seq_counters.lastInvSeq,mRec=db.seq_counters.lastRecSeq,mPay=db.seq_counters.lastPayslipSeq;
+db.accounting.forEach(tx=>{if(Number(tx.opSeq)>mOp)mOp=Number(tx.opSeq);let dt=determineDocTypeForTx(tx),ds=Number(tx.docSeq);if(ds>0){if(dt==='فاتورة'&&ds>mInv)mInv=ds;else if(dt==='إيصال'&&ds>mRec)mRec=ds;else if(dt==='قسيمة راتب'&&ds>mPay)mPay=ds}});
+db.accounting.filter(tx=>!tx.opSeq||!tx.docSeq).forEach(tx=>{if(!tx.opSeq){mOp++;tx.opSeq=mOp}let dt=determineDocTypeForTx(tx);tx.docType=dt;if(!tx.docSeq){if(dt==='فاتورة'){mInv++;tx.docSeq=mInv;tx.invNumber=String(mInv)}else if(dt==='إيصال'){mRec++;tx.docSeq=mRec}else{mPay++;tx.docSeq=mPay}}});
+db.seq_counters={lastEmpSeq:maxEmp,lastOpSeq:mOp,lastInvSeq:mInv,lastRecSeq:mRec,lastPayslipSeq:mPay};
+localStorage.setItem('sys_seq_counters',JSON.stringify(db.seq_counters));
+document.getElementById('top-seq-op').innerText=fmtNum(mOp);document.getElementById('top-seq-inv').innerText=fmtNum(mInv);
+document.getElementById('top-seq-rec').innerText=fmtNum(mRec);document.getElementById('top-seq-pay').innerText=fmtNum(mPay);
+}
+function allocateNewOperationSequence(cat){
+db.seq_counters.lastOpSeq++;let opSeq=db.seq_counters.lastOpSeq,docSeq=1,docTypeLabel='إيصال';
+if(cat==='invoice'){db.seq_counters.lastInvSeq++;docSeq=db.seq_counters.lastInvSeq;docTypeLabel='فاتورة'}
+else if(cat==='payslip'){db.seq_counters.lastPayslipSeq++;docSeq=db.seq_counters.lastPayslipSeq;docTypeLabel='قسيمة راتب'}
+else{db.seq_counters.lastRecSeq++;docSeq=db.seq_counters.lastRecSeq}
+localStorage.setItem('sys_seq_counters',JSON.stringify(db.seq_counters));ensureAllSequentialNumbers();return{opSeq,docSeq,docTypeLabel};
+}
+
+function showOperationSuccessNotification(info,cb){
+let empLine=info.empSeq?`<div><b>العامل:</b> <span class="badge-emp-seq">#${toEnDigits(info.empSeq)}</span> ${info.party||''}</div>`:'';
+document.getElementById('op-success-details').innerHTML=`<div><b>رقم العملية:</b> <span class="badge-seq">${toEnDigits(info.opSeq)}</span></div><div><b>رقم ${info.docTypeLabel}:</b> <span class="badge-inv-id">${toEnDigits(info.docSeq)}</span></div>${empLine}<div><b>الحركة:</b> <b>${info.txTypeTitle||''}</b></div><div><b>البيان:</b> <b>${toEnDigits(info.party||'')}</b> ${info.notes?' - '+toEnDigits(info.notes):''}</div><div><b>المبلغ:</b> <b class="en-num" style="color:#065f46;direction:ltr">${fmtNum(info.amount)} ${info.currency}</b></div>${info.extraDocInfo?`<div style="margin-top:4px;border-top:1px dashed #86efac;padding-top:4px;color:#0369a1;font-weight:bold">${info.extraDocInfo}</div>`:''}`;
+document.getElementById('op-success-print-btn').onclick=()=>{closeOpSuccessModal();if(typeof cb==='function')cb()};
+document.getElementById('op-success-modal').style.display='flex';
+}
+function closeOpSuccessModal(){document.getElementById('op-success-modal').style.display='none'}
+
+function previewTransactionReceiptById(txId){
+let tx=db.accounting.find(t=>String(t.id)===String(txId));if(!tx)return;
+if(tx.type==='فاتورة مبيع'&&tx.linkedOrderIds&&tx.linkedOrderIds.length>0){previewInvoiceByOrders(tx.linkedOrderIds,tx.docSeq||tx.invNumber,tx.opSeq);return}
+if(tx.type==='صرف راتب'&&tx.payslipSnapshot){showInFixedScalePreview(buildDetailedPayslipHtml(tx.payslipSnapshot,tx.docSeq,tx.opSeq));return}
+let sym=(tx.currency||'SYP')==='USD'?'$':'SYP',dt=tx.docType||determineDocTypeForTx(tx),bc=dt==='فاتورة'?'#059669':(dt==='قسيمة راتب'?'#4f46e5':'#d97706');
+showInFixedScalePreview(`<div style="border:3px solid ${bc};border-radius:10px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid ${bc};padding-bottom:10px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px">${getDocLogoHtml(48)}<div><h2 style="margin:0;color:${bc}">${sysCompanyInfo.name}</h2><div style="font-weight:900;margin-top:4px">${dt} (${tx.type})</div></div></div><div style="text-align:left;direction:ltr;font-family:Arial,sans-serif"><div style="background:#1e3a8a;color:#fff;padding:3px 9px;border-radius:5px;margin-bottom:3px">عملية #${toEnDigits(tx.opSeq||'-')}</div><div style="background:${bc};color:#fff;padding:3px 9px;border-radius:5px">${dt} #${toEnDigits(tx.docSeq||'-')}</div></div></div><div style="background:#f8fafc;padding:12px;border-radius:8px;margin-bottom:12px;font-weight:bold;line-height:1.9"><div>الجهة: ${toEnDigits(tx.party)} | <span style="direction:ltr;font-family:Arial,sans-serif">${toEnDigits(tx.date)}</span></div><div>البيان: ${toEnDigits(tx.notes||tx.type)}</div></div><div style="background:#1e293b;color:#fff;padding:12px;border-radius:8px;text-align:center;font-size:1.25rem;font-weight:900;direction:ltr;font-family:Arial,sans-serif">${fmtNum(tx.amount)} ${sym}</div></div>`);
+}
+
+async function syncWithSystem(){
+let st=document.getElementById('sync-status');if(st)st.innerText='مزامنة...';
+let locAtt=JSON.parse(localStorage.getItem('sys_attendance'))||db.attendance||[];
+try{
+const [c,e,o,a,acc]=await Promise.all([supabaseClient.from('customers').select('*'),supabaseClient.from('employees').select('*'),supabaseClient.from('orders').select('*'),supabaseClient.from('attendance').select('*'),supabaseClient.from('accounting').select('*')]);
+if(!c.error&&c.data)db.customers=c.data;
+if(!e.error&&e.data&&e.data.length>0)db.employees=e.data;else db.employees=JSON.parse(localStorage.getItem('sys_employees'))||db.employees;
+if(!o.error&&o.data)db.orders=o.data;
+if(!a.error&&Array.isArray(a.data))db.attendance=mergeAttendanceRows(a.data,locAtt);else db.attendance=locAtt;
+if(!acc.error&&acc.data&&acc.data.length>0)db.accounting=acc.data;else db.accounting=JSON.parse(localStorage.getItem('sys_accounting'))||[];
+localStorage.setItem('sys_attendance',JSON.stringify(db.attendance));localStorage.setItem('sys_employees',JSON.stringify(db.employees));
+if(st)st.innerText='متصل ●';
+}catch(err){
+db.customers=JSON.parse(localStorage.getItem('sys_customers'))||[];db.employees=JSON.parse(localStorage.getItem('sys_employees'))||[];
+db.orders=JSON.parse(localStorage.getItem('sys_orders'))||[];db.attendance=locAtt;db.accounting=JSON.parse(localStorage.getItem('sys_accounting'))||[];
+if(st)st.innerText='محلي';
+}
+db.invoices=JSON.parse(localStorage.getItem('sys_invoices'))||[];db.salary_configs=JSON.parse(localStorage.getItem('sys_salary_configs'))||{};
+db.pricing_catalog=JSON.parse(localStorage.getItem('sys_pricing_catalog'))||{SYP:{},USD:{}};db.customer_pricing=JSON.parse(localStorage.getItem('sys_customer_pricing'))||{};
+db.att_excuses=JSON.parse(localStorage.getItem('sys_att_excuses'))||{};
+if(!db.employees.find(e=>normalizeString(e.name)==='ابو حسام'))db.employees.push({id:'admin_1',name:'ابو حسام',role:'إدارة',pass:'1234',empSeq:1});
+db.customers.forEach(c=>{if(c.customPricing)db.customer_pricing[c.id]=c.customPricing});
+db.employees.forEach(e=>{if(e.salaryConfig&&!db.salary_configs[String(e.id)])db.salary_configs[String(e.id)]=e.salaryConfig});
+applyCompanyBranding();ensureAllSequentialNumbers();rebuildMissingInvoicesAndLockOrders();if(currentUser)refreshAllViews();
+}
+function setupRealtimeAttendanceSync(){
+try{supabaseClient.channel('att-live-bridge').on('postgres_changes',{event:'*',schema:'public',table:'attendance'},()=>{syncWithSystem()}).on('postgres_changes',{event:'*',schema:'public',table:'employees'},()=>{syncWithSystem()}).subscribe()}catch(e){}
+window.addEventListener('storage',ev=>{if(['sys_attendance','sys_employees','att_fixed_emp_seq_map','sys_company_info','sys_company_logo'].includes(ev.key)){applyCompanyBranding();syncWithSystem()}});
+}
+function rebuildMissingInvoicesAndLockOrders(){
+db.accounting.forEach((tx,idx)=>{
+if(!tx.currency)tx.currency='SYP';
+if(tx.cashEffect===undefined)tx.cashEffect=['تسديد دين لنا','مبيع نقدي','دين علينا'].includes(tx.type)?'in':(tx.type==='فاتورة مبيع'?'none':'out');
+if(tx.type==='فاتورة مبيع'&&(tx.linkedOrderIds||tx.linkedOrderId)){
+let oIds=(tx.linkedOrderIds||[tx.linkedOrderId]).map(String),cin=toEnDigits(String(tx.docSeq||tx.invNumber||(idx+1)));
+if(!db.invoices.find(inv=>inv.txId===tx.id||inv.id===tx.invoiceId)){let cust=db.customers.find(c=>normalizeString(c.name)===normalizeString(tx.party));db.invoices.push({id:'inv_'+tx.id,invNumber:cin,opSeq:tx.opSeq,docSeq:tx.docSeq||cin,txId:tx.id,date:tx.date,cid:cust?cust.id:'',customerName:tx.party,orderIds:oIds,totalAmount:tx.amount,currency:tx.currency,createdBy:tx.addedBy||'النظام'})}
+oIds.forEach(oid=>{let ord=db.orders.find(o=>String(o.id)===oid);if(ord){ord.isBilled=true;if(!ord.invoiceNumber)ord.invoiceNumber=cin}});
+}
+});
+}
+async function saveAccountingDB(){
+localStorage.setItem('sys_accounting',JSON.stringify(db.accounting));localStorage.setItem('sys_invoices',JSON.stringify(db.invoices));
+localStorage.setItem('sys_orders',JSON.stringify(db.orders));localStorage.setItem('sys_customers',JSON.stringify(db.customers));
+localStorage.setItem('sys_employees',JSON.stringify(db.employees));localStorage.setItem('sys_attendance',JSON.stringify(db.attendance));
+localStorage.setItem('sys_salary_configs',JSON.stringify(db.salary_configs));localStorage.setItem('sys_pricing_catalog',JSON.stringify(db.pricing_catalog));
+localStorage.setItem('sys_customer_pricing',JSON.stringify(db.customer_pricing));localStorage.setItem('sys_att_excuses',JSON.stringify(db.att_excuses));
+try{await Promise.all([supabaseClient.from('orders').upsert(db.orders),supabaseClient.from('customers').upsert(db.customers),supabaseClient.from('employees').upsert(db.employees),supabaseClient.from('accounting').upsert(db.accounting)])}catch(e){}
+}
+
+function login(){
+let name=normalizeString(document.getElementById('login-name').value),pass=toEnDigits(document.getElementById('login-pass').value.trim());
+let u=db.employees.find(e=>normalizeString(e.name)===name&&toEnDigits(e.pass)===pass);
+if(!u)return alert('اسم المستخدم أو كلمة المرور غير صحيحة!');
+if(u.role!=='إدارة'&&u.role!=='محاسبة')return alert('مخصص للإدارة والمحاسبة فقط!');
+currentUser=u;sessionStorage.setItem('accLoggedInUser',JSON.stringify(u));showApp();
+}
+function logout(){sessionStorage.removeItem('accLoggedInUser');currentUser=null;document.getElementById('main-app').classList.add('hidden');document.getElementById('login-screen').style.display='flex'}
+function showApp(){
+document.getElementById('login-screen').style.display='none';document.getElementById('main-app').classList.remove('hidden');
+document.getElementById('user-welcome').innerText=currentUser.name;document.getElementById('tx-date').value=getTodayStr();document.getElementById('backup-att-date').value=getTodayStr();
+setPayrollPeriodPreset('sat_to_thu_current');let wk=getSatWeekRange('sat_to_thu_current');
+document.getElementById('calc-start-date').value=wk.start;document.getElementById('calc-end-date').value=wk.end;
+document.getElementById('rep-start-date').value=wk.start;document.getElementById('rep-end-date').value=wk.end;
+applyCompanyBranding();populateCustFileSelector();refreshAllViews();
+}
+function setActiveCurrency(cur){
+activeCurrency=cur;document.getElementById('curr-btn-SYP').style.background=cur==='SYP'?'var(--primary)':'#64748b';
+document.getElementById('curr-btn-USD').style.background=cur==='USD'?'var(--primary)':'#64748b';
+document.getElementById('tx-currency').value=cur;document.getElementById('calc-currency').value=cur;document.getElementById('pricing-curr-label').innerText=cur;refreshAllViews();
+}
+function switchTab(id,el){document.querySelectorAll('.tab-section').forEach(s=>s.classList.add('hidden'));document.querySelectorAll('.container > .tabs .tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.remove('hidden');if(el)el.classList.add('active');refreshAllViews()}
+function switchCustSubTab(sub){['unbilled','invoices','ledger'].forEach(k=>{document.getElementById('cw-sub-'+k).classList.toggle('hidden',k!==sub);document.getElementById('subtab-btn-'+k).classList.toggle('active',k===sub)})}
+function switchHrSubTab(sub){
+['report','calc','payroll','attendance','settings'].forEach(k=>{document.getElementById('hr-sub-'+k).classList.toggle('hidden',k!==sub);document.getElementById('hr-sub-btn-'+k).classList.toggle('active',k===sub)});
+if(sub==='report'){populateAttReportEmpSelect();renderEmployeeAttendanceReport()}
+if(sub==='attendance')renderBackupAttendanceList();
+if(sub==='payroll')renderWorkersPayrollTable();
+if(sub==='settings')renderWorkersSettingsTable();
+if(sub==='calc'){populateCalcEmpSelect();recalcSalaryCalculator()}
+}
+function refreshAllViews(){
+ensureAllSequentialNumbers();updateDashboardTotals();renderGlobalPricingForm();populateCustFileSelector();
+if(selectedCustomerId)renderSelectedCustomerWorkspace();
+renderGlobalInvoicesRegistry();renderJournalTable();populateAttReportEmpSelect();renderEmployeeAttendanceReport();
+populateCalcEmpSelect();recalcSalaryCalculator();renderWorkersSettingsTable();renderWorkersPayrollTable();renderBackupAttendanceList();
+document.getElementById('cust-datalist').innerHTML=db.customers.map(c=>`<option value="${c.name}">`).join('');
+}
+
+function formatCleanGlassSpec(o){
+if(!o)return '-';let s=o.rawSpecs;
+if(s&&s.struct){if(o.orderType==='labor'||s.struct==='أجور')return toEnDigits(`أجور: ${s.desc||''} | ${s.thickness||''} ملم`);let t=`${s.struct} | ${s.type1||'عادي'} (${s.color1||'شفاف'}) ${s.thick1||''} ملم`;if(s.struct.includes('دبل'))t+=` + [سبايسر ${s.spacer||''}] + ${s.type2||'عادي'} (${s.color2||'شفاف'}) ${s.thick2||''} ملم`;return toEnDigits(t)}
+return toEnDigits((o.glassSpec||'').replace(/<[^>]*>?/gm,' ').trim()||'قياسي');
+}
+function getSplitSpecs(o){if(!o)return{thick:'-',type:'-',color:'-'};let s=o.rawSpecs;if(s&&s.struct)return{thick:toEnDigits((s.thick1||s.thickness||'')+' ملم'),type:s.struct.includes('دبل')?'دبل':(s.type1||'عادي'),color:s.color1||'شفاف'};return{thick:'-',type:formatCleanGlassSpec(o).substring(0,25),color:'شفاف'}}
+function getEffectivePrice(cid,k,cur){let cp=db.customer_pricing[cid]&&db.customer_pricing[cid][cur];if(cp&&cp[k]!==undefined&&cp[k]!==''&&!isNaN(parseFloat(cp[k])))return parseFloat(cp[k]);return parseFloat((db.pricing_catalog[cur]||{})[k])||0}
+function hasCustomPricing(cid,cur){let cp=db.customer_pricing[cid]&&db.customer_pricing[cid][cur];return cp?Object.values(cp).some(v=>v!==''&&v!==undefined):false}
+function getColorPriceKey(c){if(!c)return null;if(c.includes('اخضر')||c.includes('أخضر'))return 'color_green';if(c.includes('ازرق')||c.includes('أزرق'))return 'color_blue';if(c.includes('عاكس'))return 'color_reflective';if(c.includes('برونز'))return 'color_bronze';if(c.includes('فيميه')||c.includes('رمادي'))return 'color_fume';if(c.includes('لؤلؤي')||c.includes('لوئي'))return 'color_pearl';if(c.includes('محجر')||c.includes('مبزر'))return 'color_patterned';if(c.includes('مسلح'))return 'color_wired';if(c.includes('معشق'))return 'color_stained';return null}
+function calculateOrderAutoPrice(order,cur){
+let cid=order.cid,ta=0,tq=0,gc=0,ec=0,gN=[],eN=[];
+(order.pieces||[]).forEach(p=>{let q=Number(toEnDigits(p.qty||0));tq+=q;ta+=Number(toEnDigits(p.area))||(((Number(toEnDigits(p.len||0))*Number(toEnDigits(p.wid||0)))/10000)*q)});
+let sp=order.rawSpecs||{},isSD=(sp.struct&&sp.struct.includes('إنشائي'))||order._isStructuralDouble;
+let t1=parseInt(toEnDigits(sp.thick1||6)),k1=(sp.type1==='سيكوريت'?'securit_':'normal_')+([4,6,8,10,12].includes(t1)?t1:'other'),ck1=getColorPriceKey(sp.color1||'شفاف'),r1=getEffectivePrice(cid,k1,cur)+(ck1?getEffectivePrice(cid,ck1,cur):0);
+gc+=ta*r1;gN.push(`${sp.type1||'عادي'} ${t1}ملم`);
+if(sp.struct&&sp.struct.includes('دبل')){
+let t2=parseInt(toEnDigits(sp.thick2||6)),k2=(sp.type2==='سيكوريت'?'securit_':'normal_')+([4,6,8,10,12].includes(t2)?t2:'other'),ck2=getColorPriceKey(sp.color2||'شفاف'),r2=getEffectivePrice(cid,k2,cur)+(ck2?getEffectivePrice(cid,ck2,cur):0);
+gc+=ta*r2;ec+=ta*getEffectivePrice(cid,isSD?'srv_structural_double_sqm':'srv_double_sqm',cur);
+if(sp.spacer)ec+=ta*getEffectivePrice(cid,'spacer_'+([6,8,10,12,14,16].includes(parseInt(toEnDigits(sp.spacer)))?parseInt(toEnDigits(sp.spacer)):'other'),cur);
+eN.push(isSD?'دبل إنشائي':'دبل');
+}
+return{totalQty:tq,totalArea:ta,glassCost:Math.round(gc),extraServicesCost:Math.round(ec),autoTotal:Math.round(gc+ec),glassNotesText:toEnDigits(gN.join(' + ')),extraNotesText:toEnDigits(eN.join(' + ')||'لا يوجد إضافات')};
+}
+function renderGlobalPricingForm(){let cp=db.pricing_catalog[activeCurrency]||{};document.getElementById('global-pricing-form-container').innerHTML=PRICING_FIELDS.map(sec=>`<div style="margin-bottom:14px"><h4 style="margin:0 0 8px;color:#4c1d95;background:#f5f3ff;padding:8px;border-right:4px solid var(--price-color);border-radius:6px">${sec.section}</h4><div class="pricing-grid">${sec.items.map(i=>`<div class="price-item"><label>${i.label}</label><input type="number" id="gprice_${i.key}" value="${cp[i.key]!==undefined?toEnDigits(cp[i.key]):''}" placeholder="0"></div>`).join('')}</div></div>`).join('')}
+function saveGlobalPricing(){if(!db.pricing_catalog[activeCurrency])db.pricing_catalog[activeCurrency]={};PRICING_FIELDS.forEach(s=>s.items.forEach(i=>{let v=toEnDigits(document.getElementById('gprice_'+i.key).value);db.pricing_catalog[activeCurrency][i.key]=v!==''?parseFloat(v):''}));saveAccountingDB();alert('تم الحفظ ✓')}
+
+function getCustomerOrdersPaymentBreakdown(cid,name,cur){
+let norm=normalizeString(name).toLowerCase(),billed=db.orders.filter(o=>o.cid===cid&&o.isBilled&&(o.billedCurrency||'SYP')===cur).sort((a,b)=>Number(a.id)-Number(b.id));
+let pays=db.accounting.filter(tx=>normalizeString(tx.party).toLowerCase()===norm&&(tx.currency||'SYP')===cur&&tx.type==='تسديد دين لنا'),map={},unalloc=0;
+billed.forEach(o=>{map[String(o.id)]={orderId:String(o.id),invoiceNumber:toEnDigits(o.invoiceNumber||'-'),date:toEnDigits(o.date),specObj:getSplitSpecs(o),billedAmount:Number(o.billedAmount||0),paidAmount:0,remainingAmount:Number(o.billedAmount||0)}});
+pays.forEach(tx=>{let rem=Number(tx.amount||0),tgts=tx.linkedOrderIds&&tx.linkedOrderIds.length?tx.linkedOrderIds.map(String):(tx.linkedOrderId?[String(tx.linkedOrderId)]:[]);tgts.forEach(oid=>{if(map[oid]&&rem>0){let al=Math.min(map[oid].remainingAmount,rem);map[oid].paidAmount+=al;map[oid].remainingAmount-=al;rem-=al}});if(rem>0)unalloc+=rem});
+billed.forEach(o=>{let st=map[String(o.id)];if(st&&st.remainingAmount>0&&unalloc>0){let al=Math.min(st.remainingAmount,unalloc);st.paidAmount+=al;st.remainingAmount-=al;unalloc-=al}});
+return{orderStatusMap:map,ordersBreakdownList:billed.map(o=>map[String(o.id)])};
+}
+function populateCustFileSelector(){
+let s=toEnDigits(document.getElementById('cust-file-search').value).toLowerCase().trim();
+let fl=db.customers.filter(c=>c.name.toLowerCase().includes(s)||(c.phone&&toEnDigits(c.phone).includes(s)));
+document.getElementById('cust-file-select').innerHTML=`<option value="">-- اختر الزبون (${fmtNum(fl.length)}) --</option>`+fl.map(c=>`<option value="${c.id}" ${c.id===selectedCustomerId?'selected':''}>${c.name}</option>`).join('');
+}
+function onSelectCustomerChange(){
+selectedCustomerId=document.getElementById('cust-file-select').value;selectedUnbilledOrderIds.clear();
+if(selectedCustomerId)db.orders.filter(o=>o.cid===selectedCustomerId&&!o.isBilled).forEach(o=>selectedUnbilledOrderIds.add(String(o.id)));
+renderSelectedCustomerWorkspace();
+}
+function renderSelectedCustomerWorkspace(){
+if(!selectedCustomerId){document.getElementById('customer-workspace').classList.add('hidden');document.getElementById('customer-empty-prompt').classList.remove('hidden');return}
+let cust=db.customers.find(c=>c.id===selectedCustomerId);if(!cust)return;
+document.getElementById('customer-workspace').classList.remove('hidden');document.getElementById('customer-empty-prompt').classList.add('hidden');
+let sym=activeCurrency==='USD'?'$':'SYP';
+document.getElementById('cw-name').innerText='الزبون: '+cust.name;
+document.getElementById('cw-meta').innerText=`هاتف: ${toEnDigits(cust.phone||'غير مسجل')} | العنوان: ${cust.address||'غير مسجل'}`;
+document.getElementById('cw-price-cust-name').innerText=`${cust.name} (${activeCurrency})`;
+document.getElementById('cw-pricing-badge').innerHTML=hasCustomPricing(cust.id,activeCurrency)?`<span class="badge-status" style="background:#ede9fe;color:#5b21b6">★ أسعار خاصة</span>`:`<span class="badge-status" style="background:#fff;color:#0369a1">التسعير العام</span>`;
+
+let unbilled=db.orders.filter(o=>o.cid===cust.id&&!o.isBilled),custInvs=db.invoices.filter(inv=>inv.cid===cust.id||normalizeString(inv.customerName)===normalizeString(cust.name));
+document.getElementById('cw-unbilled-count').innerText=fmtNum(unbilled.length);document.getElementById('cw-invoices-count').innerText=fmtNum(custInvs.length);
+document.getElementById('selected-billing-panel').style.display=unbilled.length?'block':'none';
+
+let unbilledSum=0;
+document.getElementById('cw-unbilled-orders-list').innerHTML=unbilled.length?unbilled.map((o,idx)=>{
+let calc=calculateOrderAutoPrice(o,activeCurrency);unbilledSum+=calc.autoTotal;
+let chk=selectedUnbilledOrderIds.has(String(o.id)),mod=idx%3,altCls=mod===1?'alt-1':(mod===2?'alt-2':''),pillCls=mod===1?'alt-pill':(mod===2?'alt-pill-2':'');
+return `<div class="order-divider-banner"><span class="order-divider-pill ${pillCls} en-num">طلب رقم #${toEnDigits(o.id)} | (${fmtNum(idx+1)} من ${fmtNum(unbilled.length)})</span></div><div class="cust-order-card ${altCls} ${chk?'selected-for-bill':''}" id="card_order_${o.id}"><div class="cust-order-header"><label style="display:flex;align-items:center;gap:8px;margin:0;cursor:pointer"><input type="checkbox" id="chk_bill_${o.id}" ${chk?'checked':''} onchange="onToggleOrderSelection('${o.id}')"><span class="badge-order-id">Order #${toEnDigits(o.id)}</span><span class="en-num" style="font-size:.82rem;color:#475569;font-weight:bold">${toEnDigits(o.date||'-')}</span></label><span class="badge-status en-num" style="background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc">${fmtNum(calc.totalQty)} pcs | ${fmtNum(calc.totalArea,2)} m2</span></div><div class="clean-spec-box">${formatCleanGlassSpec(o)}</div><div class="form-grid cols-2" style="margin-bottom:0"><div><label>قيمة الطلب #${toEnDigits(o.id)} (${sym}):</label><input type="number" id="auto_bill_val_${o.id}" value="${calc.autoTotal}" oninput="updateSelectedBillingSummary()" style="text-align:center;direction:ltr;font-weight:900;font-size:1.05rem;border-color:#059669;color:#065f46"></div><div><label>بيان الإضافي للطلب #${toEnDigits(o.id)}:</label><input type="text" id="auto_extra_note_${o.id}" value="${calc.extraNotesText}"></div></div></div>`;
+}).join(''):`<div style="text-align:center;padding:15px;background:#f0fdf4;border-radius:8px;color:#065f46;font-weight:bold">✓ جميع الطلبات مفوترة.</div>`;
+updateSelectedBillingSummary();
+
+let bd=getCustomerOrdersPaymentBreakdown(cust.id,cust.name,activeCurrency);
+document.getElementById('cw-invoices-list').innerHTML=custInvs.length?[...custInvs].reverse().map(inv=>renderInvoiceRecordCardHTML(inv,false,bd.orderStatusMap)).join(''):`<div style="text-align:center;padding:15px;color:#64748b">لا توجد فواتير.</div>`;
+
+let bal=calculateCustomerBalance(cust.name,activeCurrency);
+document.getElementById('cw-unbilled-val').innerText=fmtNum(unbilledSum)+' '+sym;document.getElementById('cw-total-billed').innerText=fmtNum(bal.debit)+' '+sym;
+document.getElementById('cw-total-paid').innerText=fmtNum(bal.credit)+' '+sym;document.getElementById('cw-net-balance').innerText=fmtNum(bal.net)+' '+sym;
+
+let run=0;
+document.getElementById('cw-ledger-tbody').innerHTML=[...bal.txs].sort((a,b)=>(Number(a.opSeq)||0)-(Number(b.opSeq)||0)).map(tx=>{
+let d=['فاتورة مبيع','سداد دين علينا','مبيع نقدي'].includes(tx.type)?tx.amount:0,c=['تسديد دين لنا','فاتورة شراء آجلة','دين علينا','مبيع نقدي'].includes(tx.type)?tx.amount:0;run+=(d-c);
+return `<tr><td class="en-num">#${toEnDigits(tx.opSeq||'-')}</td><td class="en-num">${determineDocTypeForTx(tx)} #${toEnDigits(tx.docSeq||'-')}</td><td class="en-num" style="direction:ltr">${toEnDigits(tx.date)}</td><td>${tx.type}</td><td>${toEnDigits(tx.notes||'-')}</td><td class="en-num" style="color:#dc2626">${d?fmtNum(d):'-'}</td><td class="en-num" style="color:#059669">${c?fmtNum(c):'-'}</td><td class="en-num" style="font-weight:bold;direction:ltr">${fmtNum(run)} ${sym}</td><td><button onclick="previewTransactionReceiptById('${tx.id}')" style="width:auto;padding:4px 8px;background:#0284c7">طباعة</button></td></tr>`;
+}).join('')||`<tr><td colspan="9">لا توجد حركات</td></tr>`;
+}
+
+function renderInvoiceRecordCardHTML(inv,showName,map){
+let cur=inv.currency||'SYP',sym=cur==='USD'?'$':'SYP',paid=0,rem=0;
+if(!map)map=getCustomerOrdersPaymentBreakdown(inv.cid,inv.customerName,cur).orderStatusMap;
+(inv.orderIds||[]).forEach(id=>{let st=map[String(id)];if(st){paid+=st.paidAmount;rem+=st.remainingAmount}});
+if(paid===0&&rem===0&&inv.totalAmount>0)rem=inv.totalAmount;
+let mini=(inv.orderIds||[]).map(oid=>{let ord=db.orders.find(o=>String(o.id)===String(oid)),st=map[String(oid)],amt=st?st.billedAmount:(ord?Number(ord.billedAmount||0):0),sp=ord?formatCleanGlassSpec(ord):'طلب مفوتر';return `<div class="inv-order-mini-row"><div><span class="badge-order-id" style="font-size:.78rem;padding:2px 7px">#${toEnDigits(oid)}</span> <span style="font-weight:bold;color:#1e3a8a">${sp}</span></div><b class="en-num" style="direction:ltr;color:#065f46">${fmtNum(amt)} ${sym}</b></div>`}).join('');
+return `<div class="invoice-record-card"><div class="cust-order-header"><div><span class="badge-inv-id">فاتورة #${toEnDigits(inv.docSeq||inv.invNumber)}</span> ${showName?`<b>${inv.customerName}</b>`:''} <span class="en-num">${toEnDigits(inv.date)}</span></div><b class="en-num" style="direction:ltr">${fmtNum(inv.totalAmount)} ${sym}</b></div>${mini?`<div style="margin-bottom:8px">${mini}</div>`:''}<div style="font-size:.86rem;margin-bottom:8px">المدفوع: <b class="en-num" style="color:#059669">${fmtNum(paid)}</b> | المتبقي: <b class="en-num" style="color:${rem>0?'#dc2626':'#059669'}">${rem>0?fmtNum(rem)+' '+sym:'خالص ✓'}</b></div><div class="form-grid cols-2" style="margin-bottom:0"><button onclick='previewInvoiceByOrders(${JSON.stringify(inv.orderIds||[])},"${toEnDigits(inv.docSeq||inv.invNumber)}","${toEnDigits(inv.opSeq||'-')}")' style="background:#0f766e">معاينة الفاتورة</button>${rem>0?`<button onclick="openCustomerPaymentModalForCust('${inv.cid}','${inv.customerName}','${(inv.orderIds||[])[0]||''}')" style="background:#059669">تسديد</button>`:`<button disabled style="background:#94a3b8">✓ مسددة</button>`}</div></div>`;
+}
+function renderGlobalInvoicesRegistry(){
+let s=toEnDigits(document.getElementById('search-global-invoices').value||'').toLowerCase().trim(),d=document.getElementById('date-global-invoices').value;
+let list=[...db.invoices].reverse().filter(inv=>(!d||inv.date===d)&&(!s||toEnDigits(inv.invNumber).includes(s)||(inv.customerName&&inv.customerName.toLowerCase().includes(s))));
+document.getElementById('global-invoices-container').innerHTML=list.map(i=>renderInvoiceRecordCardHTML(i,true,null)).join('')||`<div style="text-align:center;padding:15px;color:#64748b">لا توجد فواتير.</div>`;
+}
+function onToggleOrderSelection(oid){
+let s=String(oid),c=document.getElementById('chk_bill_'+s),card=document.getElementById('card_order_'+s);
+if(c&&c.checked){selectedUnbilledOrderIds.add(s);if(card)card.classList.add('selected-for-bill')}else{selectedUnbilledOrderIds.delete(s);if(card)card.classList.remove('selected-for-bill')}
+updateSelectedBillingSummary();
+}
+function selectAllUnbilledOrders(){db.orders.filter(o=>o.cid===selectedCustomerId&&!o.isBilled).forEach(o=>{selectedUnbilledOrderIds.add(String(o.id));let c=document.getElementById('chk_bill_'+o.id);if(c)c.checked=true;let card=document.getElementById('card_order_'+o.id);if(card)card.classList.add('selected-for-bill')});updateSelectedBillingSummary()}
+function deselectAllUnbilledOrders(){selectedUnbilledOrderIds.clear();db.orders.filter(o=>o.cid===selectedCustomerId&&!o.isBilled).forEach(o=>{let c=document.getElementById('chk_bill_'+o.id);if(c)c.checked=false;let card=document.getElementById('card_order_'+o.id);if(card)card.classList.remove('selected-for-bill')});updateSelectedBillingSummary()}
+function updateSelectedBillingSummary(){
+let sym=activeCurrency==='USD'?'$':'SYP',cnt=0,q=0,a=0,tot=0;
+selectedUnbilledOrderIds.forEach(oid=>{let o=db.orders.find(x=>String(x.id)===oid&&!x.isBilled);if(o){cnt++;let c=calculateOrderAutoPrice(o,activeCurrency);q+=c.totalQty;a+=c.totalArea;let el=document.getElementById('auto_bill_val_'+o.id);tot+=el?(parseFloat(toEnDigits(el.value))||0):c.autoTotal}});
+document.getElementById('sel-orders-count').innerText=fmtNum(cnt);document.getElementById('sel-orders-qty').innerText=fmtNum(q);
+document.getElementById('sel-orders-area').innerText=fmtNum(a,2);document.getElementById('sel-orders-total').innerText=fmtNum(tot)+' '+sym;
+}
+function issueInvoiceForSelectedOrders(){
+if(!selectedCustomerId||!selectedUnbilledOrderIds.size)return alert('حدد طلباً واحداً على الأقل!');
+let cust=db.customers.find(c=>c.id===selectedCustomerId),oIds=[],grand=0;
+selectedUnbilledOrderIds.forEach(oid=>{let o=db.orders.find(x=>String(x.id)===oid&&!x.isBilled);if(o){let v=parseFloat(toEnDigits(document.getElementById('auto_bill_val_'+o.id).value))||0;o.billedAmount=v;o.billedCurrency=activeCurrency;grand+=v;oIds.push(oid)}});
+if(grand<=0)return alert('القيمة صفر!');
+let seq=allocateNewOperationSequence('invoice'),invNum=String(seq.docSeq),txId=Date.now()+'_inv',invId='inv_'+Date.now(),sym=activeCurrency==='USD'?'$':'SYP';
+oIds.forEach(oid=>{let o=db.orders.find(x=>String(x.id)===oid);if(o){o.isBilled=true;o.invoiceNumber=invNum}});
+let paidNow=parseFloat(toEnDigits(document.getElementById('batch-paid-now').value))||0;
+db.invoices.push({id:invId,invNumber:invNum,opSeq:seq.opSeq,docSeq:seq.docSeq,txId,date:getTodayStr(),cid:cust.id,customerName:cust.name,orderIds:oIds,totalAmount:grand,paidAmount:paidNow,currency:activeCurrency,createdBy:currentUser.name});
+db.accounting.push({id:txId,opSeq:seq.opSeq,docType:'فاتورة',docSeq:seq.docSeq,invoiceId:invId,invNumber:invNum,date:getTodayStr(),type:'فاتورة مبيع',amount:grand,currency:activeCurrency,party:cust.name,partyCategory:'customer',notes:`فاتورة [${invNum}]`,addedBy:currentUser.name,cashEffect:'none',linkedOrderIds:oIds});
+if(paidNow>0){let ps=allocateNewOperationSequence('invoice');db.accounting.push({id:Date.now()+'_p',opSeq:ps.opSeq,docType:'فاتورة',docSeq:ps.docSeq,date:getTodayStr(),type:'تسديد دين لنا',amount:paidNow,currency:activeCurrency,party:cust.name,partyCategory:'customer',notes:`دفعة مع الفاتورة [${invNum}]`,addedBy:currentUser.name,cashEffect:'in',linkedOrderIds:oIds})}
+document.getElementById('batch-paid-now').value=0;selectedUnbilledOrderIds.clear();saveAccountingDB();refreshAllViews();
+sendCompanyNotification({category:'finance',department:'الفواتير',actor_name:currentUser.name,title:`تم إصدار فاتورة #${invNum} للزبون ${cust.name} بقيمة ${fmtNum(grand)} ${sym}`,summary:paidNow>0?`تم استلام دفعة ${fmtNum(paidNow)} ${sym} مع الفاتورة`:'فاتورة مبيع آجلة على حساب الزبون',ref_code:`فاتورة #${invNum}`,amount:grand,details:{'الزبون':cust.name,'رقم الفاتورة':'#'+invNum,'رقم العملية':'#'+seq.opSeq,'الطلبات المشمولة':oIds.map(id=>'#'+id),'إجمالي الفاتورة':`${fmtNum(grand)} ${sym}`,'الدفعة المستلمة':`${fmtNum(paidNow)} ${sym}`,'المتبقي':`${fmtNum(Math.max(0,grand-paidNow))} ${sym}`,'المحاسب':currentUser.name}});
+showOperationSuccessNotification({opSeq:seq.opSeq,docSeq:seq.docSeq,docTypeLabel:'الفاتورة',txTypeTitle:'فاتورة مبيع',party:cust.name,amount:grand,currency:activeCurrency},()=>previewInvoiceByOrders(oIds,invNum,seq.opSeq));
+}
+function toggleCustCustomPricingBox(){
+let box=document.getElementById('cw-custom-pricing-box');
+if(box.classList.contains('hidden')){
+let cp=(db.customer_pricing[selectedCustomerId]&&db.customer_pricing[selectedCustomerId][activeCurrency])||{},gp=db.pricing_catalog[activeCurrency]||{};
+document.getElementById('cw-custom-pricing-inputs').innerHTML=PRICING_FIELDS.map(sec=>`<h5 style="margin:6px 0;color:#5b21b6">${sec.section}</h5><div class="pricing-grid">${sec.items.map(i=>`<div class="price-item"><label>${i.label}</label><input type="number" id="cprice_${i.key}" value="${cp[i.key]!==undefined?toEnDigits(cp[i.key]):''}" placeholder="${toEnDigits(gp[i.key]||0)}"></div>`).join('')}</div>`).join('');
+box.classList.remove('hidden');
+}else box.classList.add('hidden');
+}
+function saveCustomerCustomPricing(){if(!db.customer_pricing[selectedCustomerId])db.customer_pricing[selectedCustomerId]={};if(!db.customer_pricing[selectedCustomerId][activeCurrency])db.customer_pricing[selectedCustomerId][activeCurrency]={};PRICING_FIELDS.forEach(s=>s.items.forEach(i=>{let v=toEnDigits(document.getElementById('cprice_'+i.key).value);db.customer_pricing[selectedCustomerId][activeCurrency][i.key]=v!==''?parseFloat(v):''}));saveAccountingDB();document.getElementById('cw-custom-pricing-box').classList.add('hidden');refreshAllViews()}
+function resetCustomerCustomPricing(){delete db.customer_pricing[selectedCustomerId];saveAccountingDB();document.getElementById('cw-custom-pricing-box').classList.add('hidden');refreshAllViews()}
+function openCustomerPaymentModalForCust(cid,name,oid){selectedCustomerId=cid;openCustomerPaymentModal(oid)}
+function openCustomerPaymentModal(oid=''){
+let cust=db.customers.find(c=>c.id===selectedCustomerId);if(!cust)return;
+document.getElementById('pay-modal-cust-name').innerText=`${cust.name} (${activeCurrency})`;document.getElementById('pay-modal-amount').value='';
+let bd=getCustomerOrdersPaymentBreakdown(cust.id,cust.name,activeCurrency);
+document.getElementById('pay-modal-link-order').innerHTML=`<option value="">-- دفعة عامة على الحساب --</option>`+bd.ordersBreakdownList.filter(s=>s.remainingAmount>0).map(s=>`<option value="${s.orderId}" ${s.orderId===String(oid)?'selected':''}>طلب #${toEnDigits(s.orderId)} - المتبقي: ${fmtNum(s.remainingAmount)}</option>`).join('');
+document.getElementById('pay-modal-notes').value=oid?`دفعة للطلب #${toEnDigits(oid)}`:'دفعة على الحساب';
+document.getElementById('cust-payment-modal').style.display='flex';
+}
+function saveCustomerDirectPayment(){
+let cust=db.customers.find(c=>c.id===selectedCustomerId),amt=parseFloat(toEnDigits(document.getElementById('pay-modal-amount').value));
+if(!amt||amt<=0)return alert('أدخل المبلغ!');
+let seq=allocateNewOperationSequence('invoice'),txId=Date.now().toString(),oid=document.getElementById('pay-modal-link-order').value,notes=document.getElementById('pay-modal-notes').value.trim(),sym=activeCurrency==='USD'?'$':'SYP';
+let tx={id:txId,opSeq:seq.opSeq,docType:'فاتورة',docSeq:seq.docSeq,date:getTodayStr(),type:'تسديد دين لنا',amount:amt,currency:activeCurrency,party:cust.name,partyCategory:'customer',notes,addedBy:currentUser.name,cashEffect:'in'};
+if(oid){tx.linkedOrderId=oid;tx.linkedOrderIds=[oid]}
+db.accounting.push(tx);saveAccountingDB();document.getElementById('cust-payment-modal').style.display='none';refreshAllViews();
+sendCompanyNotification({category:'finance',department:'الصندوق والدفعات',actor_name:currentUser.name,title:`تم قبض ${fmtNum(amt)} ${sym} من الزبون ${cust.name}`,summary:notes||'دفعة على الحساب',ref_code:oid?`طلب #${oid}`:`إيصال #${seq.docSeq}`,amount:amt,details:{'الزبون':cust.name,'المبلغ المستلم':`${fmtNum(amt)} ${sym}`,'رقم العملية':'#'+seq.opSeq,'رقم المستند':'#'+seq.docSeq,'الطلب المرتبط':oid?'#'+oid:'دفعة عامة','الملاحظات':notes||'-','بواسطة':currentUser.name}});
+showOperationSuccessNotification({opSeq:seq.opSeq,docSeq:seq.docSeq,docTypeLabel:'الفاتورة',txTypeTitle:'قبض دفعة',party:cust.name,amount:amt,currency:activeCurrency},()=>previewTransactionReceiptById(txId));
+}
+
+function showInFixedScalePreview(html){
+let m=document.getElementById('fixed-doc-preview'),b=document.getElementById('doc-scale-box'),st=document.getElementById('doc-preview-stage');
+b.innerHTML=html;document.getElementById('print-area').innerHTML=`<div style="padding:12px;direction:rtl;font-family:Arial,Tahoma,sans-serif">${html}</div>`;
+m.style.display='flex';b.style.transform='translate(-50%,-50%) scale(1)';
+setTimeout(()=>{let sc=Math.min((st.clientWidth-16)/b.offsetWidth,(st.clientHeight-16)/b.offsetHeight,1);b.style.transform=`translate(-50%,-50%) scale(${sc})`},25);
+}
+function closeFixedDocPreview(){document.getElementById('fixed-doc-preview').style.display='none'}
+function executeDocPrint(){window.print()}
+
+function previewInvoiceByOrders(oIds,invNum,opSeq){
+let orders=oIds.map(id=>db.orders.find(o=>String(o.id)===String(id))).filter(Boolean);if(!orders.length)return;
+let cust=db.customers.find(c=>c.id===orders[0].cid)||{name:'زبون'},cur=orders[0].billedCurrency||activeCurrency,sym=cur==='USD'?'$':'SYP',grand=0;
+let rows=orders.map((o,idx)=>{let c=calculateOrderAutoPrice(o,cur),amt=Number(o.billedAmount||c.autoTotal);grand+=amt;let sep=idx>0?`<tr><td colspan="5" style="background:#cbd5e1;height:4px;padding:0"></td></tr>`:'';return `${sep}<tr style="background:${idx%2===0?'#fff':'#f8fafc'};border-bottom:1.5px solid #94a3b8"><td style="padding:6px;font-weight:900;color:#b91c1c;direction:ltr;font-family:Arial,sans-serif">#${toEnDigits(o.id)}</td><td style="padding:6px;text-align:right;font-weight:bold">${formatCleanGlassSpec(o)}</td><td style="padding:6px;font-family:Arial,sans-serif">${fmtNum(c.totalQty)}</td><td style="padding:6px;direction:ltr;font-family:Arial,sans-serif">${fmtNum(c.totalArea,2)}</td><td style="padding:6px;font-weight:900;color:#065f46;direction:ltr;font-family:Arial,sans-serif">${fmtNum(amt)} ${sym}</td></tr>`}).join('');
+showInFixedScalePreview(`<div style="border:2px solid #065f46;border-radius:8px;padding:12px"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #065f46;padding-bottom:8px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:10px">${getDocLogoHtml(46)}<div><h2 style="margin:0;color:#065f46;font-size:1.2rem">${sysCompanyInfo.name} - فاتورة #${toEnDigits(invNum)}</h2><div style="margin-top:3px;font-weight:bold;font-size:.86rem">${cust.name} | <span style="direction:ltr;font-family:Arial,sans-serif">${toEnDigits(getTodayStr())}</span></div></div></div><div style="text-align:left;font-size:.8rem;font-weight:bold;direction:ltr;font-family:Arial,sans-serif;color:#065f46">OP #${toEnDigits(opSeq||'-')}<br>Orders: ${fmtNum(orders.length)}</div></div><table style="width:100%;border-collapse:collapse;text-align:center;font-size:.8rem;margin-bottom:10px;border:1.5px solid #64748b"><thead><tr style="background:#065f46;color:#fff"><th style="padding:5px">الطلب</th><th>المواصفات</th><th>القطع</th><th>m2</th><th>المبلغ</th></tr></thead><tbody>${rows}</tbody></table><div style="background:#065f46;color:#fff;padding:10px;border-radius:6px;text-align:center;font-weight:900">الإجمالي: <span style="direction:ltr;display:inline-block;font-family:Arial,sans-serif">${fmtNum(grand)} ${sym}</span></div></div>`);
+}
+function openFullCustomerStatement(){
+let cust=db.customers.find(c=>c.id===selectedCustomerId);if(!cust)return;
+let bal=calculateCustomerBalance(cust.name,activeCurrency),sym=activeCurrency==='USD'?'$':'SYP';
+let rows=bal.txs.slice(-14).map(t=>`<tr style="border-bottom:1px solid #cbd5e1"><td style="padding:4px;direction:ltr;font-family:Arial,sans-serif">${toEnDigits(t.date)}</td><td style="padding:4px">${toEnDigits(t.notes||t.type)}</td><td style="padding:4px;color:#dc2626;font-family:Arial,sans-serif">${t.type==='فاتورة مبيع'?fmtNum(t.amount):'-'}</td><td style="padding:4px;color:#059669;font-family:Arial,sans-serif">${t.type==='تسديد دين لنا'?fmtNum(t.amount):'-'}</td></tr>`).join('');
+showInFixedScalePreview(`<div style="border:2px solid #1e3a8a;border-radius:8px;padding:12px"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1e3a8a;padding-bottom:8px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:10px">${getDocLogoHtml(44)}<div><h2 style="margin:0;color:#1e3a8a;font-size:1.15rem">كشف حساب: ${cust.name}</h2><div style="font-size:.8rem;font-weight:bold;color:#475569">${sysCompanyInfo.name}</div></div></div><div style="direction:ltr;font-family:Arial,sans-serif;font-weight:bold;font-size:.82rem">${toEnDigits(getTodayStr())}</div></div><table style="width:100%;border-collapse:collapse;text-align:center;font-size:.8rem;margin-bottom:10px"><thead><tr style="background:#1e3a8a;color:#fff"><th style="padding:5px">التاريخ</th><th>البيان</th><th>عليه</th><th>له</th></tr></thead><tbody>${rows}</tbody></table><div style="text-align:center;font-weight:900;padding:8px;background:#eff6ff;border-radius:6px">الرصيد المتبقي: <span style="direction:ltr;display:inline-block;font-family:Arial,sans-serif">${fmtNum(bal.net)} ${sym}</span></div></div>`);
+}
+function showAllCustomersSummaryModal(){
+let sym=activeCurrency==='USD'?'$':'SYP';
+let rows=db.customers.map(c=>({...c,...calculateCustomerBalance(c.name,activeCurrency)})).sort((a,b)=>b.net-a.net).slice(0,18).map(r=>`<tr style="border-bottom:1px solid #cbd5e1"><td style="padding:5px">${r.name}</td><td style="padding:5px;font-family:Arial,sans-serif">${fmtNum(r.debit)}</td><td style="padding:5px;font-family:Arial,sans-serif">${fmtNum(r.credit)}</td><td style="padding:5px;font-weight:bold;direction:ltr;font-family:Arial,sans-serif">${fmtNum(r.net)} ${sym}</td></tr>`).join('');
+showInFixedScalePreview(`<div style="border:2px solid #b45309;border-radius:8px;padding:12px"><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">${getDocLogoHtml(38)}<h3 style="margin:0;color:#b45309">أرصدة الزبائن (${activeCurrency})</h3></div><table style="width:100%;border-collapse:collapse;text-align:center;font-size:.82rem"><thead><tr style="background:#b45309;color:#fff"><th style="padding:5px">الزبون</th><th>عليه</th><th>له</th><th>الصافي</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+}
+
+function calculateCustomerBalance(name,cur){
+let norm=normalizeString(name).toLowerCase(),txs=db.accounting.filter(t=>normalizeString(t.party).toLowerCase()===norm&&(t.currency||'SYP')===cur&&t.type!=='سلفة عامل'&&t.type!=='صرف راتب'&&t.partyCategory!=='worker'),d=0,c=0;
+txs.forEach(t=>{if(t.type==='فاتورة مبيع'||t.type==='سداد دين علينا')d+=t.amount;else if(t.type==='تسديد دين لنا'||t.type==='فاتورة شراء آجلة'||t.type==='دين علينا')c+=t.amount;else if(t.type==='مبيع نقدي'){d+=t.amount;c+=t.amount}});
+return{debit:d,credit:c,net:d-c,txs};
+}
+function updateDashboardTotals(){
+let sym=activeCurrency==='USD'?' $':' SYP',cIn=0,cOut=0,debts=0;
+db.accounting.filter(t=>(t.currency||'SYP')===activeCurrency).forEach(t=>{if(t.cashEffect==='in')cIn+=Number(t.amount||0);else if(t.cashEffect==='out')cOut+=Number(t.amount||0)});
+db.customers.forEach(c=>{let b=calculateCustomerBalance(c.name,activeCurrency);if(b.net>0)debts+=b.net});
+document.getElementById('dash-cash-in').innerText=fmtNum(cIn)+sym;document.getElementById('dash-cash-out').innerText=fmtNum(cOut)+sym;
+document.getElementById('dash-cash-balance').innerText=fmtNum(cIn-cOut)+sym;document.getElementById('dash-total-debts').innerText=fmtNum(debts)+sym;
+document.getElementById('unbilled-badge').innerText=fmtNum(db.orders.filter(o=>!o.isBilled).length);
+}
+function saveNewTransaction(){
+let type=document.getElementById('tx-type').value,amt=parseFloat(toEnDigits(document.getElementById('tx-amount').value)),cur=document.getElementById('tx-currency').value,party=document.getElementById('tx-party').value.trim(),notes=document.getElementById('tx-notes').value.trim(),txDate=document.getElementById('tx-date').value||getTodayStr();
+if(!amt||amt<=0||!party)return alert('أدخل الاسم والمبلغ!');
+let cashEffect=['تسديد دين لنا','مبيع نقدي','دين علينا'].includes(type)?'in':(['مصاريف','مشتريات','سداد دين علينا'].includes(type)?'out':'none');
+let seq=allocateNewOperationSequence(['تسديد دين لنا','مبيع نقدي'].includes(type)?'invoice':'receipt'),txId=Date.now().toString(),sym=cur==='USD'?'$':'SYP';
+db.accounting.push({id:txId,opSeq:seq.opSeq,docType:seq.docTypeLabel,docSeq:seq.docSeq,date:txDate,type,amount:amt,currency:cur,party,partyCategory:'customer',notes,addedBy:currentUser.name,cashEffect});
+saveAccountingDB();document.getElementById('tx-amount').value='';document.getElementById('tx-notes').value='';refreshAllViews();
+let nt='';
+if(type==='مصاريف'||type==='مشتريات')nt=`تم دفع ${fmtNum(amt)} ${sym} ${notes?notes:type} (${party})`;
+else if(type==='تسديد دين لنا')nt=`تم قبض ${fmtNum(amt)} ${sym} من ${party}`;
+else if(type==='سداد دين علينا')nt=`تم دفع ${fmtNum(amt)} ${sym} للمورد ${party}`;
+else nt=`${type}: ${party} بقيمة ${fmtNum(amt)} ${sym}`;
+sendCompanyNotification({category:'finance',department:type,actor_name:currentUser.name,title:nt,summary:notes||type,ref_code:`${seq.docTypeLabel} #${seq.docSeq}`,amount:amt,details:{'نوع الحركة':type,'الجهة / الاسم':party,'المبلغ':`${fmtNum(amt)} ${sym}`,'البيان / التفاصيل':notes||'-','رقم العملية':'#'+seq.opSeq,'رقم المستند':'#'+seq.docSeq,'تاريخ الحركة':txDate,'بواسطة':currentUser.name}});
+showOperationSuccessNotification({opSeq:seq.opSeq,docSeq:seq.docSeq,docTypeLabel:seq.docTypeLabel,txTypeTitle:type,party,amount:amt,currency:cur},()=>previewTransactionReceiptById(txId));
+}
+function deleteTx(id){let tx=db.accounting.find(x=>x.id===id);if(tx&&tx.type==='فاتورة مبيع')return alert('الفاتورة مقفولة!');if(!confirm('حذف الحركة؟'))return;db.accounting=db.accounting.filter(t=>t.id!==id);saveAccountingDB();refreshAllViews()}
+function renderJournalTable(){
+let list=db.accounting.filter(t=>(t.currency||'SYP')===activeCurrency).sort((a,b)=>(Number(b.opSeq)||0)-(Number(a.opSeq)||0));
+document.getElementById('journal-tbody').innerHTML=list.map(t=>{
+let dt=t.docType||determineDocTypeForTx(t),bg=dt==='فاتورة'?'#0f766e':(dt==='قسيمة راتب'?'#4f46e5':'#d97706');
+return `<tr><td class="en-num">#${toEnDigits(t.opSeq||'-')}</td><td><span class="badge-status en-num" style="background:${bg};color:#fff">${dt} #${toEnDigits(t.docSeq||'-')}</span></td><td class="en-num" style="direction:ltr">${toEnDigits(t.date)}</td><td>${t.type}</td><td style="font-weight:bold">${t.party}</td><td>${toEnDigits(t.notes||'-')}</td><td class="en-num" style="color:#059669;font-weight:bold">${t.cashEffect==='in'?'+'+fmtNum(t.amount):'-'}</td><td class="en-num" style="color:#dc2626;font-weight:bold">${t.cashEffect==='out'?'-'+fmtNum(t.amount):'-'}</td><td class="en-num">${t.type==='فاتورة مبيع'?fmtNum(t.amount):'-'}</td><td><button onclick="previewTransactionReceiptById('${t.id}')" style="width:auto;padding:4px 8px;background:#0284c7">طباعة</button></td><td>${t.type==='فاتورة مبيع'?'مقفول':`<button onclick="deleteTx('${t.id}')" style="width:auto;padding:4px 8px;background:#dc2626">✕</button>`}</td></tr>`;
+}).join('')||`<tr><td colspan="11">لا توجد حركات</td></tr>`;
+}
+
+function populateAttReportEmpSelect(){let sel=document.getElementById('rep-emp-select');if(!sel)return;let cur=sel.value;sel.innerHTML=`<option value="">-- اختر الموظف لعرض كشف دوامه --</option>`+db.employees.map(e=>`<option value="${e.id}" ${String(e.id)===String(cur)?'selected':''}>#${toEnDigits(e.empSeq)} - ${e.name} (${e.role||'عامل'})</option>`).join('')}
+function setAttReportPreset(m){let r=getSatWeekRange(m);document.getElementById('rep-start-date').value=r.start;document.getElementById('rep-end-date').value=r.end;renderEmployeeAttendanceReport()}
+function openEmployeeAttendanceReportDirect(empId){let s=document.getElementById('payroll-start-date').value||getSatWeekRange('sat_to_thu_current').start,e=document.getElementById('payroll-end-date').value||getSatWeekRange('sat_to_thu_current').end;switchHrSubTab('report');document.getElementById('rep-emp-select').value=empId;document.getElementById('rep-start-date').value=s;document.getElementById('rep-end-date').value=e;renderEmployeeAttendanceReport()}
+
+function renderEmployeeAttendanceReport(){
+let box=document.getElementById('emp-att-report-body');if(!box)return;
+let empId=document.getElementById('rep-emp-select').value;
+if(!empId){box.innerHTML=`<div style="text-align:center;padding:22px;color:#64748b;font-weight:bold">اختر اسم الموظف من القائمة العلوية لعرض كشف دوامه من السبت للخميس.</div>`;return}
+let emp=db.employees.find(e=>String(e.id)===String(empId));if(!emp)return;
+let s=document.getElementById('rep-start-date').value||getSatWeekRange('sat_to_thu_current').start,e=document.getElementById('rep-end-date').value||getSatWeekRange('sat_to_thu_current').end;
+let d=calculateWorkerPayrollData(emp,s,e),cfg=d.cfg,otDec=Number((d.totalOtMins/60).toFixed(2));
+let rowsHtml=d.dailyLog.map(row=>{
+let bg='#fff',sh='',ab='';
+if(row.status==='present'){bg=row.lateMins>0?'#fffbeb':'#f0fdf4';sh=`<span class="badge-status" style="background:#dcfce7;color:#065f46">حاضر ●</span>`;if(row.rawLateMins>0){if(row.excuseLate){sh+=` <span class="badge-status" style="background:#e0f2fe;color:#0369a1">تأخير معفى ✓</span>`;ab+=`<button class="excuse-btn undo-late" onclick="toggleAttendanceExcuse('${emp.id}','${row.date}','excuseLate')">إلغاء إعفاء التأخير</button>`}else ab+=`<button class="excuse-btn remove-late" onclick="toggleAttendanceExcuse('${emp.id}','${row.date}','excuseLate')">إزالة التأخير</button>`}}
+else if(row.status==='friday_ot'){bg='#fffbeb';sh=`<span class="badge-status" style="background:#fef3c7;color:#92400e">إضافي جمعة</span>`}
+else if(row.status==='excused'){bg='#eff6ff';sh=`<span class="badge-status" style="background:#dbeafe;color:#1e40af">معفى (ظرف/عطلة)</span>`;ab+=`<button class="excuse-btn undo-abs" onclick="toggleAttendanceExcuse('${emp.id}','${row.date}','excuseAbsent')">إرجاع كغياب</button>`}
+else if(row.status==='absent'){bg='#fef2f2';sh=`<span class="badge-status" style="background:#fee2e2;color:#991b1b">غائب ✕</span>`;ab+=`<button class="excuse-btn remove-abs" onclick="toggleAttendanceExcuse('${emp.id}','${row.date}','excuseAbsent')">إزالة الغياب (ظرف/عطلة)</button>`}
+else if(row.status==='holiday'){bg='#f8fafc';sh=`<span class="badge-status" style="background:#e2e8f0;color:#475569">عطلة رسمية (جمعة)</span>`}
+else{bg='#f8fafc';sh=`<span style="color:#94a3b8">يوم قادم</span>`}
+let otC=row.otMins>0?`<b class="en-num" style="color:#4f46e5;direction:ltr;display:inline-block">+${fmtMinsToHM(row.otMins)}</b>`:'-';
+let ltC=row.lateMins>0?`<b class="en-num" style="color:#dc2626;direction:ltr;display:inline-block">${fmtNum(row.lateMins)} min</b>`:(row.rawLateMins>0&&row.excuseLate?`<span class="en-num" style="text-decoration:line-through;color:#94a3b8">${fmtNum(row.rawLateMins)} min</span>`:'-');
+return `<tr style="background:${bg}"><td style="font-weight:bold">${row.dayName}</td><td class="en-num" style="direction:ltr">${toEnDigits(row.date)}</td><td class="en-num" style="direction:ltr;font-weight:bold;color:#059669">${row.checkIn?toEnDigits(row.checkIn):'-'}</td><td class="en-num" style="direction:ltr;font-weight:bold;color:#0284c7">${row.checkOut?toEnDigits(row.checkOut):'-'}</td><td class="en-num" style="direction:ltr;font-weight:bold">${row.mins>0?fmtMinsToHM(row.mins):'-'}</td><td>${otC}</td><td>${ltC}</td><td>${sh}${row.note?`<div style="font-size:.75rem;color:#475569;margin-top:2px">${toEnDigits(row.note)}</div>`:''}</td><td>${ab||'-'}</td></tr>`;
+}).join('');
+
+box.innerHTML=`<div style="background:#fff;border:1.5px solid #c7d2fe;border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:.86rem;font-weight:bold"><div>الموظف: <span class="badge-emp-seq">#${toEnDigits(emp.empSeq)}</span> <span style="color:#1e3a8a;font-size:1rem">${emp.name}</span></div><div class="en-num" style="color:#475569">الدوام المعتمد: <b style="color:#4f46e5">${toEnDigits(cfg.shiftStart)} - ${toEnDigits(cfg.shiftEnd)}</b> (${fmtNum(cfg.dailyHours)}h | سماحية ${fmtNum(cfg.graceMins)} min)</div></div>
+<div class="acc-dashboard cols-5"><div class="acc-box" style="border-color:#10b981;background:#f0fdf4"><h4 style="color:#065f46">أيام الحضور</h4><div class="val" style="color:#059669">${fmtNum(d.daysPresent)}${d.fridayDays>0?' + '+fmtNum(d.fridayDays):''}</div></div><div class="acc-box" style="border-color:#4f46e5;background:#eef2ff"><h4 style="color:#3730a3">إجمالي الإضافي</h4><div class="val" style="color:#4f46e5">${fmtNum(otDec)}h</div><div class="en-num" style="font-size:.74rem;color:#475569">(${fmtMinsToHM(d.totalOtMins)})</div></div><div class="acc-box" style="border-color:#f59e0b;background:#fffbeb"><h4 style="color:#92400e">إجمالي التأخير</h4><div class="val" style="color:#d97706">${fmtNum(d.totalLateMins)}m</div></div><div class="acc-box" style="border-color:#dc2626;background:#fef2f2"><h4 style="color:#991b1b">أيام الغياب</h4><div class="val" style="color:#dc2626">${fmtNum(d.absentDays)}</div></div><div class="acc-box" style="border-color:#0284c7;background:#f0f9ff"><h4 style="color:#0369a1">معفى (ظرف)</h4><div class="val" style="color:#0284c7">${fmtNum(d.excusedDays)}</div></div></div>
+<div class="table-wrap" style="margin-bottom:12px"><table class="data-table"><thead><tr style="background:#3730a3"><th>اليوم</th><th>التاريخ</th><th>حضور</th><th>انصراف</th><th>العمل</th><th>الإضافي</th><th>التأخير</th><th>الحالة / السبب</th><th>إعفاء ظرف / عطلة</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+<div class="form-grid cols-2" style="margin-bottom:0"><button onclick="printEmployeeAttendanceReport('${emp.id}','${s}','${e}')" style="background:#0284c7;padding:12px">طباعة كشف الدوام</button><button onclick="sendReportEmployeeToCalculator('${emp.id}','${s}','${e}')" style="background:#059669;padding:12px">تحويل لحاسبة الراتب والإضافي</button></div>`;
+}
+function sendReportEmployeeToCalculator(id,s,e){switchHrSubTab('calc');loadWorkerIntoCalculator(id,s,e)}
+function printEmployeeAttendanceReport(id,s,e){
+let emp=db.employees.find(x=>String(x.id)===String(id));if(!emp)return;
+let d=calculateWorkerPayrollData(emp,s,e),cfg=d.cfg,otDec=Number((d.totalOtMins/60).toFixed(2));
+let rows=d.dailyLog.map(r=>{let st=r.status==='present'?'حاضر':(r.status==='friday_ot'?'إضافي جمعة':(r.status==='excused'?'معفى (ظرف)':(r.status==='holiday'?'عطلة جمعة':(r.status==='absent'?'غائب':'-'))));return `<tr style="border-bottom:1px solid #cbd5e1;background:${r.status==='absent'?'#fef2f2':(r.status==='excused'?'#eff6ff':'#fff')}"><td style="padding:5px;font-weight:bold">${r.dayName}</td><td style="padding:5px;direction:ltr;font-family:Arial,sans-serif">${toEnDigits(r.date)}</td><td style="padding:5px;direction:ltr;font-family:Arial,sans-serif">${toEnDigits(r.checkIn||'-')}</td><td style="padding:5px;direction:ltr;font-family:Arial,sans-serif">${toEnDigits(r.checkOut||'-')}</td><td style="padding:5px;direction:ltr;font-family:Arial,sans-serif">${r.mins>0?fmtMinsToHM(r.mins):'-'}</td><td style="padding:5px;direction:ltr;font-family:Arial,sans-serif;color:#4f46e5;font-weight:bold">${r.otMins>0?'+'+fmtMinsToHM(r.otMins):'-'}</td><td style="padding:5px;direction:ltr;font-family:Arial,sans-serif;color:#dc2626">${r.lateMins>0?fmtNum(r.lateMins)+'m':'-'}</td><td style="padding:5px;font-weight:bold">${st}${r.note?' ('+toEnDigits(r.note)+')':''}</td></tr>`}).join('');
+showInFixedScalePreview(`<div style="border:2.5px solid #4f46e5;border-radius:10px;padding:14px"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #4f46e5;padding-bottom:8px;margin-bottom:10px"><div style="display:flex;align-items:center;gap:10px">${getDocLogoHtml(46)}<div><h3 style="margin:0;color:#4f46e5">كشف دوام موظف - ${sysCompanyInfo.name}</h3><div style="font-weight:bold;margin-top:4px">${emp.name} (#${toEnDigits(emp.empSeq)}) | الدوام: <span style="direction:ltr;font-family:Arial,sans-serif">${toEnDigits(cfg.shiftStart)} - ${toEnDigits(cfg.shiftEnd)}</span></div></div></div><div style="text-align:left;font-size:.82rem;font-weight:bold;direction:ltr;font-family:Arial,sans-serif">${toEnDigits(s)} -> ${toEnDigits(e)}</div></div><table style="width:100%;border-collapse:collapse;text-align:center;font-size:.76rem;margin-bottom:10px;border:1px solid #cbd5e1"><thead><tr style="background:#3730a3;color:#fff"><th style="padding:5px">اليوم</th><th>التاريخ</th><th>حضور</th><th>انصراف</th><th>العمل</th><th>الإضافي</th><th>التأخير</th><th>الحالة</th></tr></thead><tbody>${rows}</tbody></table><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;font-size:.8rem;font-weight:900;font-family:Arial,sans-serif"><div style="background:#f0fdf4;border:1px solid #10b981;padding:6px;border-radius:6px;color:#065f46">حضور: ${fmtNum(d.daysPresent)}</div><div style="background:#eef2ff;border:1px solid #4f46e5;padding:6px;border-radius:6px;color:#3730a3">إضافي: ${fmtNum(otDec)}h</div><div style="background:#fffbeb;border:1px solid #f59e0b;padding:6px;border-radius:6px;color:#92400e">تأخير: ${fmtNum(d.totalLateMins)}m</div><div style="background:#fef2f2;border:1px solid #dc2626;padding:6px;border-radius:6px;color:#991b1b">غياب: ${fmtNum(d.absentDays)} | معفى: ${fmtNum(d.excusedDays)}</div></div></div>`);
+}
+
+function buildDetailedPayslipHtml(snap,pSeq='-',opSeq='-'){
+let sym=snap.currency==='USD'?'$':'SYP',eb=snap.empSeq?`<span style="background:#4f46e5;color:#fff;padding:2px 7px;border-radius:5px;font-weight:900;font-size:.8rem;direction:ltr;font-family:Arial,sans-serif">#${toEnDigits(snap.empSeq)}</span>`:'';
+let att=(snap.dailyLog&&snap.dailyLog.length)?snap.dailyLog.map(d=>{
+let bg=d.status==='absent'?'#fef2f2':(d.status==='excused'?'#eff6ff':(d.status==='friday_ot'?'#fffbeb':(d.status==='holiday'?'#f8fafc':'#fff')));
+let sb=d.status==='present'?`<span style="color:#059669;font-weight:bold">${fmtMinsToHM(d.mins)}${d.otMins>0?' (+'+fmtMinsToHM(d.otMins)+')':''}</span>`:(d.status==='friday_ot'?`<span style="color:#b45309;font-weight:900">إضافي جمعة (${fmtMinsToHM(d.mins)})</span>`:(d.status==='excused'?`<span style="color:#1e40af;font-weight:900">معفى (ظرف)</span>`:(d.status==='holiday'?`<span style="color:#64748b;font-weight:bold">عطلة (جمعة)</span>`:`<span style="color:#dc2626;font-weight:900">غائب ✕</span>`)));
+return `<tr style="background:${bg};border-bottom:1px solid #e2e8f0"><td style="padding:3px 4px;font-weight:bold">${d.dayName}</td><td style="padding:3px 4px;direction:ltr;font-family:Arial,sans-serif">${toEnDigits(d.date)}</td><td style="padding:3px 4px;direction:ltr;font-weight:bold;color:#059669;font-family:Arial,sans-serif">${d.checkIn?toEnDigits(d.checkIn):'-'}</td><td style="padding:3px 4px;direction:ltr;font-weight:bold;color:#0284c7;font-family:Arial,sans-serif">${d.checkOut?toEnDigits(d.checkOut):'-'}</td><td style="padding:3px 4px;direction:ltr;font-family:Arial,sans-serif">${sb}</td><td style="padding:3px 4px;font-size:.7rem;color:#475569">${d.note?toEnDigits(d.note):'-'}</td></tr>`;
+}).join(''):`<tr><td colspan="6" style="padding:6px;color:#64748b">لا يوجد سجل دوام في هذه الفترة</td></tr>`;
+let adv=(snap.advancesList&&snap.advancesList.length)?`<div style="font-size:.78rem;font-weight:900;color:#b91c1c;margin:6px 0 3px">تفصيل السلف المسحوبة:</div><table style="width:100%;border-collapse:collapse;text-align:center;font-size:.74rem;margin-bottom:7px;border:1px solid #fca5a5"><thead><tr style="background:#dc2626;color:#fff"><th style="padding:3px">التاريخ</th><th style="padding:3px">البيان</th><th style="padding:3px">المبلغ</th></tr></thead><tbody>${snap.advancesList.map(a=>`<tr style="border-bottom:1px solid #fecaca"><td style="padding:3px;direction:ltr;font-family:Arial,sans-serif">${toEnDigits(a.date)}</td><td style="padding:3px;text-align:right">${toEnDigits(a.notes||'سلفة')}</td><td style="padding:3px;font-weight:900;color:#dc2626;direction:ltr;font-family:Arial,sans-serif">-${fmtNum(a.amount)} ${sym}</td></tr>`).join('')}</tbody></table>`:'';
+return `<div style="border:2.5px solid #4f46e5;border-radius:10px;padding:12px"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #4f46e5;padding-bottom:7px;margin-bottom:7px"><div style="display:flex;align-items:center;gap:9px">${getDocLogoHtml(46)}<div><h3 style="margin:0;color:#4f46e5;font-size:1.15rem">قسيمة راتب - ${sysCompanyInfo.name||'أبو حسام للزجاج'}</h3><div style="font-size:.9rem;font-weight:bold;margin-top:3px">العامل: <span style="color:#1e3a8a">${snap.empName||'عامل'}</span> ${eb}</div></div></div><div style="text-align:left;direction:ltr;font-family:Arial,sans-serif"><div style="background:#4f46e5;color:#fff;padding:2px 8px;border-radius:5px;font-weight:900;font-size:.82rem;margin-bottom:2px">قسيمة #${toEnDigits(pSeq)}</div><div style="background:#1e3a8a;color:#fff;padding:2px 8px;border-radius:5px;font-weight:900;font-size:.76rem">عملية #${toEnDigits(opSeq)}</div></div></div>
+<div style="font-size:.78rem;background:#eef2ff;padding:5px 8px;border-radius:6px;margin-bottom:7px;font-weight:bold;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span>فترة الراتب: <span style="direction:ltr;font-family:Arial,sans-serif">${toEnDigits(snap.startDate||'-')} -> ${toEnDigits(snap.endDate||'-')}</span></span><span>${toEnDigits(snap.notes||'راتب')}</span></div>
+<div style="font-size:.78rem;font-weight:900;color:#1e3a8a;margin-bottom:3px">سجل الدوام اليومي:</div>
+<table style="width:100%;border-collapse:collapse;text-align:center;font-size:.73rem;margin-bottom:7px;border:1px solid #cbd5e1"><thead><tr style="background:#1e3a8a;color:#fff"><th style="padding:4px">اليوم</th><th style="padding:4px">التاريخ</th><th style="padding:4px">حضور</th><th style="padding:4px">انصراف</th><th style="padding:4px">الساعات / الحالة</th><th style="padding:4px">ملاحظة</th></tr></thead><tbody>${att}</tbody></table>${adv}
+<div style="font-size:.78rem;font-weight:900;color:#065f46;margin-bottom:3px">ملخص حساب الراتب:</div>
+<table style="width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:8px;border:1px solid #cbd5e1">
+<tr style="background:#f8fafc"><td style="padding:5px 7px;text-align:right;font-weight:bold">الراتب الأساسي (${fmtNum(snap.daysWorked)} أيام x ${fmtNum(snap.dailyWage)})</td><td style="padding:5px 7px;font-weight:900;color:#1e40af;direction:ltr;text-align:left;font-family:Arial,sans-serif">${fmtNum(snap.basePay)} ${sym}</td></tr>
+${(snap.fridayDays>0||snap.fridayPay>0)?`<tr style="background:#fffbeb"><td style="padding:5px 7px;text-align:right;font-weight:bold;color:#92400e">عمل يوم الجمعة (${fmtNum(snap.fridayDays)} يوم x ${fmtNum(snap.fridayMult)})</td><td style="padding:5px 7px;font-weight:900;color:#b45309;direction:ltr;text-align:left;font-family:Arial,sans-serif">+${fmtNum(snap.fridayPay)} ${sym}</td></tr>`:''}
+${(snap.otPay>0||snap.otHours>0)?`<tr><td style="padding:5px 7px;text-align:right;font-weight:bold">أجر ساعات الإضافي (${fmtNum(snap.otHours)}h x ${fmtNum(snap.otMult)})</td><td style="padding:5px 7px;font-weight:900;color:#4f46e5;direction:ltr;text-align:left;font-family:Arial,sans-serif">+${fmtNum(snap.otPay)} ${sym}</td></tr>`:''}
+${snap.bonus>0?`<tr style="background:#f0fdf4"><td style="padding:5px 7px;text-align:right;font-weight:bold">مكافآت وإضافات</td><td style="padding:5px 7px;font-weight:900;color:#059669;direction:ltr;text-align:left;font-family:Arial,sans-serif">+${fmtNum(snap.bonus)} ${sym}</td></tr>`:''}
+<tr style="background:#fef2f2"><td style="padding:5px 7px;text-align:right;font-weight:bold;color:#991b1b">خصم الغياب (${fmtNum(snap.absentDays||0)} يوم)</td><td style="padding:5px 7px;font-weight:900;color:#dc2626;direction:ltr;text-align:left;font-family:Arial,sans-serif">-${fmtNum(snap.absentDeduct||0)} ${sym}</td></tr>
+<tr style="background:#fef2f2"><td style="padding:5px 7px;text-align:right;font-weight:bold;color:#991b1b">إجمالي السلف المسحوبة</td><td style="padding:5px 7px;font-weight:900;color:#dc2626;direction:ltr;text-align:left;font-family:Arial,sans-serif">-${fmtNum(snap.advances||0)} ${sym}</td></tr>
+${snap.otherDeduct>0?`<tr style="background:#fef2f2"><td style="padding:5px 7px;text-align:right;font-weight:bold;color:#991b1b">خصومات أخرى</td><td style="padding:5px 7px;font-weight:900;color:#dc2626;direction:ltr;text-align:left;font-family:Arial,sans-serif">-${fmtNum(snap.otherDeduct)} ${sym}</td></tr>`:''}
+</table>
+<div style="background:#065f46;color:#fff;padding:10px;border-radius:8px;text-align:center;font-size:1.2rem;font-weight:900;margin-bottom:8px">صافي الراتب: <span style="direction:ltr;display:inline-block;font-family:Arial,sans-serif">${fmtNum(snap.netPay)} ${sym}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:.78rem;color:#475569;font-weight:bold;padding:4px 10px 0"><div>توقيع المحاسب: .....................</div><div>توقيع العامل بالاستلام: .....................</div></div></div>`;
+}
+
+function setCalcWeekPreset(m){let r=getSatWeekRange(m);document.getElementById('calc-start-date').value=r.start;document.getElementById('calc-end-date').value=r.end;loadWorkerIntoCalculator()}
+function populateCalcEmpSelect(){let sel=document.getElementById('calc-emp-select');if(!sel)return;let cur=sel.value;sel.innerHTML=`<option value="">-- حساب حر (بدون اختيار عامل) --</option>`+db.employees.map(e=>`<option value="${e.id}" ${String(e.id)===String(cur)?'selected':''}>#${toEnDigits(e.empSeq)} - ${e.name} (${e.role||'عامل'})</option>`).join('')}
+function setOtMultiplier(m){document.getElementById('calc-ot-mult').value=m;syncOtButtonsUI();recalcSalaryCalculator()}
+function syncOtButtonsUI(){let v=parseFloat(toEnDigits(document.getElementById('calc-ot-mult').value));document.querySelectorAll('.ot-btn').forEach(b=>b.classList.toggle('active',parseFloat(b.getAttribute('data-mult'))===v))}
+function setFridayMultiplier(m){document.getElementById('calc-friday-mult').value=m;syncFriButtonsUI();recalcSalaryCalculator()}
+function syncFriButtonsUI(){let v=parseFloat(toEnDigits(document.getElementById('calc-friday-mult').value));document.querySelectorAll('.fri-btn').forEach(b=>b.classList.toggle('active',parseFloat(b.getAttribute('data-fmult'))===v))}
+function onDailyWageOrAbsentChange(){let dw=parseFloat(toEnDigits(document.getElementById('calc-daily-wage').value))||0,ab=parseFloat(toEnDigits(document.getElementById('calc-absent-days').value))||0;document.getElementById('calc-absent-deduct').value=Math.round(dw*ab);recalcSalaryCalculator()}
+function loadWorkerIntoCalculator(fId=null,fS=null,fE=null){
+let sel=document.getElementById('calc-emp-select');if(fId)sel.value=fId;if(fS)document.getElementById('calc-start-date').value=fS;if(fE)document.getElementById('calc-end-date').value=fE;
+let empId=sel.value,hEl=document.getElementById('calc-att-hint'),pBan=document.getElementById('calc-already-paid-banner');
+if(!empId){hEl.classList.add('hidden');pBan.classList.add('hidden');recalcSalaryCalculator();return}
+let emp=db.employees.find(e=>String(e.id)===String(empId));if(!emp)return;
+let s=document.getElementById('calc-start-date').value||getTodayStr(),e=document.getElementById('calc-end-date').value||getTodayStr();
+let ex=findExistingSalaryPaymentForPeriod(emp,s,e);
+if(ex){pBan.classList.remove('hidden');pBan.innerHTML=`تنبيه: العامل <b>${emp.name}</b> قبض راتبه بالفعل عن هذه الفترة استناداً إلى قسيمة الراتب رقم <span class="badge-inv-id" style="background:#dc2626;border-color:#fecaca">#${toEnDigits(ex.docSeq||'-')}</span> بتاريخ <span class="en-num">${toEnDigits(ex.date)}</span> (${fmtNum(ex.amount)} ${ex.currency||'SYP'}). لا يمكن صرفه مرة ثانية.`}else pBan.classList.add('hidden');
+let d=calculateWorkerPayrollData(emp,s,e),cfg=d.cfg,stdH=parseFloat(cfg.dailyHours)||8,dw=Math.round(d.hourlyRate*stdH);
+let baseD=(cfg.type==='أسبوعي'||cfg.type==='شهري')?(d.daysPresent+d.excusedDays+d.absentDays):(d.daysPresent+d.excusedDays);
+let autoAb=(cfg.type==='أسبوعي'||cfg.type==='شهري')?d.absentDays:0,autoOt=Number((d.totalOtMins/60).toFixed(2));
+document.getElementById('calc-daily-wage').value=dw>0?dw:'';document.getElementById('calc-std-hours').value=stdH;
+document.getElementById('calc-days-worked').value=baseD;document.getElementById('calc-friday-days').value=d.fridayDays;
+document.getElementById('calc-ot-hours').value=autoOt;document.getElementById('calc-absent-days').value=autoAb;
+document.getElementById('calc-absent-deduct').value=Math.round(autoAb*dw);document.getElementById('calc-advances').value=d.totalAdvances||0;
+document.getElementById('calc-other-deduct').value=0;document.getElementById('calc-bonus').value=0;
+document.getElementById('calc-currency').value=cfg.currency||activeCurrency;document.getElementById('calc-notes').value=`راتب (${toEnDigits(s)} إلى ${toEnDigits(e)})`;
+hEl.classList.remove('hidden');hEl.innerHTML=`دوام <b>${emp.name}</b> (<span class="en-num">${toEnDigits(s)} -> ${toEnDigits(e)}</span>): حضور <b>${fmtNum(d.daysPresent)}</b> | معفى: <b>${fmtNum(d.excusedDays)}</b> | إضافي: <b class="en-num" style="color:#4f46e5">${fmtNum(autoOt)}h</b> | تأخير: <b class="en-num" style="color:#d97706">${fmtNum(d.totalLateMins)}m</b> | جمعة: <b class="en-num" style="color:#b45309">${fmtNum(d.fridayDays)}</b> | غياب: <b class="en-num" style="color:#dc2626">${fmtNum(d.absentDays)}</b>.`;
+recalcSalaryCalculator();
+}
+function sendWorkerToCalculator(empId){let s=document.getElementById('payroll-start-date').value,e=document.getElementById('payroll-end-date').value,fm=document.getElementById('payroll-fri-mult').value;switchHrSubTab('calc');if(fm){document.getElementById('calc-friday-mult').value=fm;syncFriButtonsUI()}loadWorkerIntoCalculator(empId,s,e)}
+function getCalculatorState(){
+let empId=document.getElementById('calc-emp-select').value,emp=db.employees.find(e=>String(e.id)===String(empId))||null;
+let startDate=document.getElementById('calc-start-date').value||getTodayStr(),endDate=document.getElementById('calc-end-date').value||getTodayStr();
+let dailyWage=parseFloat(toEnDigits(document.getElementById('calc-daily-wage').value))||0,stdHours=parseFloat(toEnDigits(document.getElementById('calc-std-hours').value))||8;
+let daysWorked=parseFloat(toEnDigits(document.getElementById('calc-days-worked').value))||0,fridayDays=parseFloat(toEnDigits(document.getElementById('calc-friday-days').value))||0;
+let fridayMult=parseFloat(toEnDigits(document.getElementById('calc-friday-mult').value))||1,otHours=parseFloat(toEnDigits(document.getElementById('calc-ot-hours').value))||0;
+let otMult=parseFloat(toEnDigits(document.getElementById('calc-ot-mult').value))||1,absentDays=parseFloat(toEnDigits(document.getElementById('calc-absent-days').value))||0;
+let absentDeduct=parseFloat(toEnDigits(document.getElementById('calc-absent-deduct').value))||0,advances=parseFloat(toEnDigits(document.getElementById('calc-advances').value))||0;
+let otherDeduct=parseFloat(toEnDigits(document.getElementById('calc-other-deduct').value))||0,bonus=parseFloat(toEnDigits(document.getElementById('calc-bonus').value))||0;
+let currency=document.getElementById('calc-currency').value||activeCurrency,notes=document.getElementById('calc-notes').value.trim();
+let hourlyRate=stdHours>0?(dailyWage/stdHours):0,basePay=Math.round(dailyWage*daysWorked),fridayPay=Math.round(fridayDays*dailyWage*fridayMult),otPay=Math.round(otHours*hourlyRate*otMult),netPay=Math.round(basePay+fridayPay+otPay+bonus-absentDeduct-advances-otherDeduct);
+let dailyLog=[],advancesList=[];if(emp){let p=calculateWorkerPayrollData(emp,startDate,endDate);dailyLog=p.dailyLog;advancesList=p.advancesList}
+return{emp,empName:emp?emp.name:'عامل',empSeq:emp?emp.empSeq:'',startDate,endDate,dailyWage,stdHours,daysWorked,fridayDays,fridayMult,fridayPay,otHours,otMult,absentDays,absentDeduct,advances,otherDeduct,bonus,currency,notes,hourlyRate,basePay,otPay,netPay,dailyLog,advancesList};
+}
+function recalcSalaryCalculator(){
+let st=getCalculatorState(),sym=st.currency==='USD'?'$':'SYP';
+document.getElementById('res-hourly-rate').innerText=`${fmtNum(Math.round(st.hourlyRate))} ${sym}`;document.getElementById('res-days-lbl').innerText=fmtNum(st.daysWorked);
+document.getElementById('res-base-pay').innerText=`${fmtNum(st.basePay)} ${sym}`;document.getElementById('res-fri-days-lbl').innerText=fmtNum(st.fridayDays);
+document.getElementById('res-fri-mult-lbl').innerText=fmtNum(st.fridayMult);document.getElementById('res-fri-pay').innerText=`+${fmtNum(st.fridayPay)} ${sym}`;
+document.getElementById('res-ot-lbl').innerText=fmtNum(st.otHours);document.getElementById('res-mult-lbl').innerText=fmtNum(st.otMult);
+document.getElementById('res-ot-pay').innerText=`+${fmtNum(st.otPay)} ${sym}`;document.getElementById('res-bonus-pay').innerText=`+${fmtNum(st.bonus)} ${sym}`;
+document.getElementById('res-abs-lbl').innerText=fmtNum(st.absentDays);document.getElementById('res-abs-pay').innerText=`-${fmtNum(st.absentDeduct)} ${sym}`;
+document.getElementById('res-adv-pay').innerText=`-${fmtNum(st.advances)} ${sym}`;document.getElementById('res-other-pay').innerText=`-${fmtNum(st.otherDeduct)} ${sym}`;
+document.getElementById('res-net-pay').innerText=`${fmtNum(st.netPay)} ${sym}`;
+}
+function previewCalculatorPayslip(){showInFixedScalePreview(buildDetailedPayslipHtml(getCalculatorState(),'معاينة','-'))}
+function paySalaryFromCalculator(){
+let st=getCalculatorState();if(!st.emp)return alert('يرجى اختيار اسم العامل أولاً!');
+let ex=findExistingSalaryPaymentForPeriod(st.emp,st.startDate,st.endDate);if(ex){showDuplicateSalaryError(st.emp,ex);return}
+if(st.netPay<=0)return alert('صافي الراتب صفر أو سالب!');
+let sym=st.currency==='USD'?'$':'SYP';
+if(!confirm(`تأكيد صرف راتب (${st.emp.name}) بقيمة ${fmtNum(st.netPay)} ${sym} وخصمه من الصندوق؟`))return;
+let seq=allocateNewOperationSequence('payslip'),txId=Date.now().toString(),friTxt=st.fridayDays>0?` | جمعة ${fmtNum(st.fridayDays)} يوم (x${fmtNum(st.fridayMult)})`:'',dn=`${st.notes||'راتب'} | ${fmtNum(st.daysWorked)} يوم${friTxt}`,snap={...st,emp:undefined};
+db.accounting.push({id:txId,opSeq:seq.opSeq,docType:'قسيمة راتب',docSeq:seq.docSeq,empId:st.emp.id,empSeq:st.emp.empSeq,date:getTodayStr(),type:'صرف راتب',amount:st.netPay,currency:st.currency,party:st.emp.name,partyCategory:'worker',notes:dn,addedBy:currentUser.name,cashEffect:'out',payslipSnapshot:snap});
+saveAccountingDB();refreshAllViews();loadWorkerIntoCalculator(st.emp.id,st.startDate,st.endDate);
+sendCompanyNotification({category:'finance',department:'الرواتب',actor_name:st.emp.name,title:`راتب ${st.emp.name} طلع ${fmtNum(st.netPay)} ${sym}`,summary:`تم صرف الراتب عن الفترة (${toEnDigits(st.startDate)} إلى ${toEnDigits(st.endDate)})`,ref_code:`قسيمة #${seq.docSeq}`,amount:st.netPay,details:{'العامل':`${st.emp.name} (#${toEnDigits(st.emp.empSeq)})`,'الفترة':`${toEnDigits(st.startDate)} إلى ${toEnDigits(st.endDate)}`,'أيام العمل':`${fmtNum(st.daysWorked)} يوم`,'إضافي الجمعة':st.fridayDays>0?`${fmtNum(st.fridayDays)} يوم (+${fmtNum(st.fridayPay)} ${sym})`:'لا يوجد','ساعات الإضافي':st.otHours>0?`${fmtNum(st.otHours)} ساعة (+${fmtNum(st.otPay)} ${sym})`:'لا يوجد','المكافآت':st.bonus>0?`+${fmtNum(st.bonus)} ${sym}`:'0','خصم الغياب':st.absentDeduct>0?`-${fmtNum(st.absentDeduct)} ${sym}`:'0','السلف المخصومة':st.advances>0?`-${fmtNum(st.advances)} ${sym}`:'0','صافي الراتب المصروف':`${fmtNum(st.netPay)} ${sym}`,'رقم القسيمة':'#'+seq.docSeq,'بواسطة':currentUser.name}});
+showOperationSuccessNotification({opSeq:seq.opSeq,docSeq:seq.docSeq,docTypeLabel:'قسيمة الراتب',empSeq:st.emp.empSeq,txTypeTitle:'راتب عامل',party:st.emp.name,notes:dn,amount:st.netPay,currency:st.currency,extraDocInfo:`تم خصم ${fmtNum(st.netPay)} ${sym} تلقائياً من الصندوق (${st.currency}).`},()=>showInFixedScalePreview(buildDetailedPayslipHtml(snap,seq.docSeq,seq.opSeq)));
+}
+
+function renderBackupAttendanceList(){
+let c=document.getElementById('backup-att-list');if(!c)return;
+let ds=document.getElementById('backup-att-date').value||getTodayStr(),isFri=new Date(ds+'T00:00:00').getDay()===5;
+document.getElementById('backup-friday-banner').classList.toggle('hidden',!isFri);
+c.innerHTML=db.employees.map(emp=>{
+let rec=findAttRecord(emp.id,ds),hIn=rec&&rec.checkIn,hOut=rec&&rec.checkOut,cls=(isFri&&hIn)?'friday-ot':(hOut?'done':(hIn?'present':''));
+let st=isFri?(hIn?(hOut?'إضافي جمعة (انصرف)':'إضافي جمعة (حاضر)'):'عطلة جمعة'):(hOut?'انصرف':(hIn?'حاضر بالمعمل':'لم يُسجل بعد'));
+return `<div class="att-worker-card ${cls}"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px"><div style="font-weight:900"><span class="badge-emp-seq">#${toEnDigits(emp.empSeq)}</span> ${emp.name}</div><span class="badge-status" style="background:#fff;border:1px solid #cbd5e1">${st}</span></div><div class="form-grid cols-3" style="margin-bottom:0;align-items:end"><div><label style="font-size:.8rem">حضور الصبح:</label><div style="display:flex;gap:5px"><input type="time" id="bk_in_${emp.id}" value="${hIn?rec.checkIn:''}" style="padding:6px"><button onclick="markBackupAttendance('${emp.id}','in')" style="width:auto;background:${isFri?'#d97706':'#059669'};padding:6px 12px">حضور</button></div></div><div><label style="font-size:.8rem">انصراف المسا:</label><div style="display:flex;gap:5px"><input type="time" id="bk_out_${emp.id}" value="${hOut?rec.checkOut:''}" style="padding:6px"><button onclick="markBackupAttendance('${emp.id}','out')" style="width:auto;background:#0284c7;padding:6px 12px">انصراف</button></div></div><div><button onclick="saveManualBackupAtt('${emp.id}')" style="background:#4f46e5;padding:8px">حفظ ومزامنة</button></div></div></div>`;
+}).join('');
+}
+async function markBackupAttendance(empId,m){let n=getNowTimeStr();if(m==='in')document.getElementById('bk_in_'+empId).value=n;if(m==='out')document.getElementById('bk_out_'+empId).value=n;await saveManualBackupAtt(empId,m)}
+async function saveManualBackupAtt(empId,mode=null){
+let emp=db.employees.find(e=>String(e.id)===String(empId));if(!emp)return;
+let ds=document.getElementById('backup-att-date').value||getTodayStr(),ci=document.getElementById('bk_in_'+empId).value,co=document.getElementById('bk_out_'+empId).value,rec=findAttRecord(emp.id,ds);
+if(!rec){rec={id:`att_${emp.id}_${ds}`,empId:emp.id,empName:emp.name,date:ds,checkIn:ci,checkOut:co,notes:'',recordedBy:currentUser.name+' (محاسبة)'};db.attendance.push(rec)}
+else{rec.checkIn=ci;rec.checkOut=co;rec.recordedBy=currentUser.name+' (محاسبة)'}
+localStorage.setItem('sys_attendance',JSON.stringify(db.attendance));renderBackupAttendanceList();renderWorkersPayrollTable();renderEmployeeAttendanceReport();
+try{await pushAttendanceRecordSafe(rec)}catch(e){}
+if(mode==='in')sendCompanyNotification({category:'attendance',department:'الدوام',actor_name:emp.name,title:`${emp.name} فتح دوام الآن (${toEnDigits(ci)})`,summary:`تسجيل حضور بتاريخ ${toEnDigits(ds)}`,ref_code:`عامل #${emp.empSeq}`,details:{'العامل':emp.name,'التاريخ':ds,'وقت الحضور':ci,'سجله':currentUser.name}});
+else if(mode==='out')sendCompanyNotification({category:'attendance',department:'الدوام',actor_name:emp.name,title:`${emp.name} سكّر دوام (${toEnDigits(co)})`,summary:`تسجيل انصراف بتاريخ ${toEnDigits(ds)}`,ref_code:`عامل #${emp.empSeq}`,details:{'العامل':emp.name,'التاريخ':ds,'وقت الحضور':ci||'-','وقت الانصراف':co,'سجله':currentUser.name}});
+}
+
+function onBulkShiftTimeChange(){let st=document.getElementById('bulk-shift-start').value,en=document.getElementById('bulk-shift-end').value;if(st&&en){let d=parseTimeToMinutes(en)-parseTimeToMinutes(st);if(d<=0)d+=1440;document.getElementById('bulk-daily-hours').value=Number((d/60).toFixed(2))}}
+function applyBulkShiftSettings(){
+let sv=document.getElementById('bulk-shift-start').value||'08:00',ev=document.getElementById('bulk-shift-end').value||'16:00',hv=parseFloat(toEnDigits(document.getElementById('bulk-daily-hours').value))||8,gv=parseInt(toEnDigits(document.getElementById('bulk-grace-mins').value));if(isNaN(gv))gv=15;
+if(!confirm(`تطبيق الدوام (${sv} - ${ev} | ${hv} ساعات | سماحية ${gv} دقيقة) على جميع الموظفين (${db.employees.length} موظف)؟`))return;
+db.employees.forEach(emp=>{let cur=getWorkerSalaryConfig(emp.id),up={...cur,shiftStart:sv,shiftEnd:ev,dailyHours:hv,graceMins:gv};db.salary_configs[String(emp.id)]=up;emp.salaryConfig=up});
+saveAccountingDB();renderWorkersSettingsTable();renderWorkersPayrollTable();renderEmployeeAttendanceReport();alert(`تم تطبيق إعدادات الدوام على جميع الموظفين (${db.employees.length}) بنجاح ✓`);
+}
+function setPayrollPeriodPreset(m){let now=new Date(),sEl=document.getElementById('payroll-start-date'),eEl=document.getElementById('payroll-end-date');if(m==='this_month'){sEl.value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;eEl.value=formatDateObj(now)}else{let r=getSatWeekRange(m);sEl.value=r.start;eEl.value=r.end}if(currentUser)renderWorkersPayrollTable()}
+function getWorkerSalaryConfig(id){let sv=db.salary_configs[String(id)]||db.salary_configs[id]||{};return{type:sv.type||'أسبوعي',baseSalary:sv.baseSalary||0,currency:sv.currency||activeCurrency,dailyHours:sv.dailyHours||8,weekDays:sv.weekDays||6,shiftStart:sv.shiftStart||'08:00',shiftEnd:sv.shiftEnd||'16:00',graceMins:sv.graceMins!==undefined?sv.graceMins:15}}
+function calcHourlyRate(c){let b=parseFloat(c.baseSalary)||0,h=parseFloat(c.dailyHours)||8,w=parseFloat(c.weekDays)||6;if(b<=0)return 0;if(c.type==='ساعي')return b;if(c.type==='يومي')return b/h;if(c.type==='أسبوعي')return b/(w*h);return b/(30*h)}
+function parseTimeToMinutes(t){if(!t)return 0;let p=toEnDigits(t).split(':');return parseInt(p[0])*60+parseInt(p[1])}
+
+function calculateWorkerPayrollData(emp,s,e,fm=1.5){
+let cfg=getWorkerSalaryConfig(emp.id),hr=calcHourlyRate(cfg),mr=hr/60,stdH=parseFloat(cfg.dailyHours)||8,stdM=stdH*60,dw=Math.round(hr*stdH),ssM=parseTimeToMinutes(cfg.shiftStart||'08:00'),gm=Number(cfg.graceMins)||0,today=getTodayStr(),days=getDateRangeArray(s,e);
+let regM=0,excM=0,friM=0,tOt=0,tLt=0,dPres=0,fDays=0,aDays=0,eDays=0,log=[];
+days.forEach(day=>{
+let rec=findAttRecord(emp.id,day.dateStr),exc=getAttendanceExcuse(emp.id,day.dateStr,rec);
+if(day.dayIndex===5){
+if(rec&&rec.checkIn){fDays++;let m=rec.checkOut?(parseTimeToMinutes(rec.checkOut)-parseTimeToMinutes(rec.checkIn)):stdM;if(m<0)m+=1440;friM+=m;log.push({date:day.dateStr,dayName:day.dayName,checkIn:rec.checkIn,checkOut:rec.checkOut||'',mins:m,otMins:0,rawLateMins:0,lateMins:0,excuseLate:false,excuseAbsent:false,status:'friday_ot',note:rec.notes||'إضافي جمعة'})}
+else log.push({date:day.dateStr,dayName:day.dayName,checkIn:'',checkOut:'',mins:0,otMins:0,rawLateMins:0,lateMins:0,excuseLate:false,excuseAbsent:false,status:'holiday',note:''});
+}else if(rec&&rec.checkIn){
+dPres++;let inM=parseTimeToMinutes(rec.checkIn),rLt=(inM>ssM+gm)?(inM-ssM):0,lt=exc.excuseLate?0:rLt;tLt+=lt;
+let m=rec.checkOut?(parseTimeToMinutes(rec.checkOut)-inM):stdM;if(m<0)m+=1440;regM+=m;let ot=Math.max(0,m-stdM);tOt+=ot;
+log.push({date:day.dateStr,dayName:day.dayName,checkIn:rec.checkIn,checkOut:rec.checkOut||'',mins:m,otMins:ot,rawLateMins:rLt,lateMins:lt,excuseLate:exc.excuseLate,excuseAbsent:false,status:'present',note:exc.excuseLate?(exc.reason||'تأخير معفى'):(rec.notes||'')});
+}else if(day.dateStr<=today){
+if(exc.excuseAbsent){eDays++;excM+=stdM;log.push({date:day.dateStr,dayName:day.dayName,checkIn:'',checkOut:'',mins:0,otMins:0,rawLateMins:0,lateMins:0,excuseLate:false,excuseAbsent:true,status:'excused',note:exc.reason||'ظرف / عطلة معفاة'})}
+else{aDays++;log.push({date:day.dateStr,dayName:day.dayName,checkIn:'',checkOut:'',mins:0,otMins:0,rawLateMins:0,lateMins:0,excuseLate:false,excuseAbsent:false,status:'absent',note:'غياب'})}
+}else log.push({date:day.dateStr,dayName:day.dayName,checkIn:'',checkOut:'',mins:0,otMins:0,rawLateMins:0,lateMins:0,excuseLate:false,excuseAbsent:false,status:'future',note:''});
+});
+let tM=regM+friM,fPay=Math.round(fDays*dw*fm),eReg=Math.round((regM+excM)*mr),eSal=eReg+fPay,abDed=Math.round(aDays*dw);
+let nn=normalizeString(emp.name).toLowerCase(),advL=db.accounting.filter(tx=>normalizeString(tx.party).toLowerCase()===nn&&tx.type==='سلفة عامل'&&(tx.currency||'SYP')===cfg.currency&&tx.date>=s&&tx.date<=e),tAdv=advL.reduce((sum,t)=>sum+t.amount,0),exP=findExistingSalaryPaymentForPeriod(emp,s,e);
+return{emp,cfg,hourlyRate:hr,dailyWage:dw,stdHours:stdH,daysPresent:dPres,fridayDays:fDays,fridayMult:fm,fridayPay:fPay,absentDays:aDays,excusedDays:eDays,absentDeduct:abDed,regularMinutes:regM,fridayMinutes:friM,totalOtMins:tOt,totalLateMins:tLt,totalHours:Math.floor(tM/60),remMinutes:tM%60,earnedSalary:eSal,advancesList:advL,totalAdvances:tAdv,netPayable:eSal-tAdv,dailyLog:log,lastPayslipTx:exP};
+}
+
+function renderWorkersSettingsTable(){
+document.getElementById('workers-settings-tbody').innerHTML=db.employees.map(emp=>{
+let c=getWorkerSalaryConfig(emp.id),h=calcHourlyRate(c);
+return `<tr><td><span class="badge-emp-seq">#${toEnDigits(emp.empSeq)}</span></td><td style="font-weight:bold">${emp.name}</td><td><select id="sal_type_${emp.id}" style="padding:4px"><option value="أسبوعي" ${c.type==='أسبوعي'?'selected':''}>أسبوعي</option><option value="شهري" ${c.type==='شهري'?'selected':''}>شهري</option><option value="يومي" ${c.type==='يومي'?'selected':''}>يومية</option><option value="ساعي" ${c.type==='ساعي'?'selected':''}>ساعي</option></select></td><td><input type="number" id="sal_val_${emp.id}" value="${c.baseSalary||''}" style="padding:4px;min-width:75px;text-align:center;direction:ltr"></td><td><select id="sal_curr_${emp.id}" style="padding:4px"><option value="SYP" ${c.currency==='SYP'?'selected':''}>SYP</option><option value="USD" ${c.currency==='USD'?'selected':''}>USD</option></select></td><td><input type="time" id="sal_start_${emp.id}" value="${c.shiftStart||'08:00'}" style="padding:4px;direction:ltr"></td><td><input type="time" id="sal_end_${emp.id}" value="${c.shiftEnd||'16:00'}" style="padding:4px;direction:ltr"></td><td><input type="number" id="sal_hrs_${emp.id}" value="${c.dailyHours||8}" step="0.5" style="padding:4px;width:52px;text-align:center"></td><td><input type="number" id="sal_grace_${emp.id}" value="${c.graceMins!==undefined?c.graceMins:15}" style="padding:4px;width:52px;text-align:center"></td><td class="en-num" style="font-weight:bold;color:#047857;direction:ltr">${h>0?fmtNum(Math.round(h)):'-'}</td><td><button onclick="saveWorkerSalaryConfig('${emp.id}')" style="padding:5px 10px;background:var(--hr-color);width:auto">حفظ</button></td></tr>`;
+}).join('');
+}
+function saveWorkerSalaryConfig(id){
+let sv=document.getElementById('sal_start_'+id).value||'08:00',ev=document.getElementById('sal_end_'+id).value||'16:00',hv=parseFloat(toEnDigits(document.getElementById('sal_hrs_'+id).value))||8,gv=parseInt(toEnDigits(document.getElementById('sal_grace_'+id).value));if(isNaN(gv))gv=15;
+db.salary_configs[String(id)]={type:document.getElementById('sal_type_'+id).value,baseSalary:parseFloat(toEnDigits(document.getElementById('sal_val_'+id).value))||0,currency:document.getElementById('sal_curr_'+id).value,dailyHours:hv,weekDays:6,shiftStart:sv,shiftEnd:ev,graceMins:gv};
+let emp=db.employees.find(e=>String(e.id)===String(id));if(emp)emp.salaryConfig=db.salary_configs[String(id)];
+saveAccountingDB();renderWorkersSettingsTable();renderWorkersPayrollTable();renderEmployeeAttendanceReport();alert('تم حفظ إعدادات الدوام والراتب ✓');
+}
+function renderWorkersPayrollTable(){
+let s=document.getElementById('payroll-start-date').value||getTodayStr(),e=document.getElementById('payroll-end-date').value||getTodayStr(),fm=parseFloat(toEnDigits(document.getElementById('payroll-fri-mult').value))||1.5;
+document.getElementById('workers-payroll-tbody').innerHTML=db.employees.map(emp=>{
+let d=calculateWorkerPayrollData(emp,s,e,fm),sym=d.cfg.currency==='USD'?'$':'SYP',otH=Number((d.totalOtMins/60).toFixed(2)),pt=d.lastPayslipTx;
+let act=pt?`<button onclick="payWorkerNetSalary('${emp.id}',${d.netPayable},'${d.cfg.currency}')" style="padding:5px 7px;background:#64748b;width:auto;font-size:.76rem">✓ قبض (#${toEnDigits(pt.docSeq)})</button>`:(d.netPayable>0?`<button onclick="payWorkerNetSalary('${emp.id}',${d.netPayable},'${d.cfg.currency}')" style="padding:5px 7px;background:#059669;width:auto;font-size:.76rem">صرف</button>`:'');
+return `<tr><td><span class="badge-emp-seq">#${toEnDigits(emp.empSeq)}</span></td><td style="font-weight:bold">${emp.name}</td><td class="en-num" style="color:#059669;font-weight:bold">${fmtNum(d.daysPresent)}${d.excusedDays>0?` <span style="color:#0284c7;font-size:.75rem">(+${fmtNum(d.excusedDays)} معفى)</span>`:''}</td><td class="en-num" style="color:#b45309;font-weight:900">${d.fridayDays>0?fmtNum(d.fridayDays):'-'}</td><td class="en-num" style="color:#dc2626;font-weight:bold">${fmtNum(d.absentDays)}</td><td class="en-num" style="color:#4f46e5;font-weight:bold;direction:ltr">${otH>0?'+'+fmtNum(otH)+'h':'-'}</td><td class="en-num" style="color:#d97706;font-weight:bold">${d.totalLateMins>0?fmtNum(d.totalLateMins)+'m':'-'}</td><td class="en-num" style="color:#059669;font-weight:bold">${fmtNum(d.earnedSalary)}</td><td class="en-num" style="color:#dc2626;font-weight:bold">${fmtNum(d.totalAdvances)}</td><td class="en-num" style="font-weight:900;color:#047857;direction:ltr">${fmtNum(d.netPayable)} ${sym}</td><td><div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap"><button onclick="openEmployeeAttendanceReportDirect('${emp.id}')" style="padding:5px 7px;background:#3730a3;width:auto;font-size:.76rem">دوام</button><button onclick="sendWorkerToCalculator('${emp.id}')" style="padding:5px 7px;background:#4f46e5;width:auto;font-size:.76rem">حاسبة</button><button onclick="openWorkerPayslipModal('${emp.id}')" style="padding:5px 7px;background:#0284c7;width:auto;font-size:.76rem">قسيمة</button>${act}</div></td></tr>`;
+}).join('');
+}
+function buildPayrollSnapshotFromData(emp,s,e){
+let fm=parseFloat(toEnDigits(document.getElementById('payroll-fri-mult').value))||1.5,d=calculateWorkerPayrollData(emp,s,e,fm),tpd=d.daysPresent+d.excusedDays+d.absentDays,fbp=Math.round(tpd*d.dailyWage),otH=Number((d.totalOtMins/60).toFixed(2)),otP=Math.round(otH*d.hourlyRate);
+return{empName:emp.name,empSeq:emp.empSeq,startDate:s,endDate:e,dailyWage:d.dailyWage,daysWorked:tpd,fridayDays:d.fridayDays,fridayMult:fm,fridayPay:d.fridayPay,otHours:otH,otMult:1,absentDays:d.absentDays,absentDeduct:d.absentDeduct,advances:d.totalAdvances,otherDeduct:0,bonus:0,currency:d.cfg.currency,notes:`راتب (${toEnDigits(s)} إلى ${toEnDigits(e)})`,basePay:fbp,otPay:otP,netPay:d.netPayable,dailyLog:d.dailyLog,advancesList:d.advancesList,lastPayslipTx:d.lastPayslipTx};
+}
+function payWorkerNetSalary(empId,netAmount,cur){
+let emp=db.employees.find(e=>String(e.id)===String(empId));if(!emp)return;
+let s=document.getElementById('payroll-start-date').value,e=document.getElementById('payroll-end-date').value,ex=findExistingSalaryPaymentForPeriod(emp,s,e);
+if(ex){showDuplicateSalaryError(emp,ex);return}
+let sym=cur==='USD'?'$':'SYP';
+if(!confirm(`تأكيد صرف راتب (${emp.name}) بقيمة ${fmtNum(netAmount)} ${sym} وخصمه من الصندوق؟`))return;
+let seq=allocateNewOperationSequence('payslip'),txId=Date.now().toString(),snap=buildPayrollSnapshotFromData(emp,s,e);
+db.accounting.push({id:txId,opSeq:seq.opSeq,docType:'قسيمة راتب',docSeq:seq.docSeq,empId:emp.id,empSeq:emp.empSeq,date:getTodayStr(),type:'صرف راتب',amount:netAmount,currency:cur,party:emp.name,partyCategory:'worker',notes:`راتب (${toEnDigits(s)} إلى ${toEnDigits(e)})`,addedBy:currentUser.name,cashEffect:'out',payslipSnapshot:snap});
+saveAccountingDB();refreshAllViews();
+sendCompanyNotification({category:'finance',department:'الرواتب',actor_name:emp.name,title:`راتب ${emp.name} طلع ${fmtNum(netAmount)} ${sym}`,summary:`تم صرف الراتب عن الفترة (${toEnDigits(s)} إلى ${toEnDigits(e)})`,ref_code:`قسيمة #${seq.docSeq}`,amount:netAmount,details:{'العامل':`${emp.name} (#${toEnDigits(emp.empSeq)})`,'الفترة':`${toEnDigits(s)} إلى ${toEnDigits(e)}`,'أيام الفترة':`${fmtNum(snap.daysWorked)} يوم`,'إضافي الجمعة':snap.fridayDays>0?`${fmtNum(snap.fridayDays)} يوم (+${fmtNum(snap.fridayPay)} ${sym})`:'لا يوجد','السلف المخصومة':snap.advances>0?`-${fmtNum(snap.advances)} ${sym}`:'0','صافي الراتب المصروف':`${fmtNum(netAmount)} ${sym}`,'رقم القسيمة':'#'+seq.docSeq,'بواسطة':currentUser.name}});
+showOperationSuccessNotification({opSeq:seq.opSeq,docSeq:seq.docSeq,docTypeLabel:'قسيمة الراتب',empSeq:emp.empSeq,txTypeTitle:'راتب عامل',party:emp.name,amount:netAmount,currency:cur,extraDocInfo:`تم خصم ${fmtNum(netAmount)} ${cur} تلقائياً من الصندوق.`},()=>showInFixedScalePreview(buildDetailedPayslipHtml(snap,seq.docSeq,seq.opSeq)));
+}
+function openQuickAdvanceModal(){document.getElementById('adv-emp-select').innerHTML=db.employees.map(e=>`<option value="${e.id}">#${toEnDigits(e.empSeq)} - ${e.name}</option>`).join('');document.getElementById('adv-amount').value='';document.getElementById('adv-notes').value='';document.getElementById('adv-currency').value=activeCurrency;document.getElementById('advance-modal').style.display='flex'}
+function saveWorkerAdvance(){
+let emp=db.employees.find(e=>String(e.id)===String(document.getElementById('adv-emp-select').value));if(!emp)return;
+let amt=parseFloat(toEnDigits(document.getElementById('adv-amount').value));if(!amt||amt<=0)return alert('أدخل المبلغ!');
+let cur=document.getElementById('adv-currency').value,notes=document.getElementById('adv-notes').value.trim()||'سلفة على الراتب',sym=cur==='USD'?'$':'SYP',seq=allocateNewOperationSequence('payslip'),txId=Date.now().toString();
+db.accounting.push({id:txId,opSeq:seq.opSeq,docType:'قسيمة راتب',docSeq:seq.docSeq,empId:emp.id,empSeq:emp.empSeq,date:getTodayStr(),type:'سلفة عامل',amount:amt,currency:cur,party:emp.name,partyCategory:'worker',notes,addedBy:currentUser.name,cashEffect:'out'});
+saveAccountingDB();document.getElementById('advance-modal').style.display='none';refreshAllViews();
+sendCompanyNotification({category:'finance',department:'سلف العمال',actor_name:emp.name,title:`${emp.name} أخذ سلفة ${fmtNum(amt)} ${sym}`,summary:notes,ref_code:`قسيمة #${seq.docSeq}`,amount:amt,details:{'العامل':`${emp.name} (#${toEnDigits(emp.empSeq)})`,'قيمة السلفة':`${fmtNum(amt)} ${sym}`,'الملاحظات':notes,'رقم القسيمة':'#'+seq.docSeq,'رقم العملية':'#'+seq.opSeq,'التاريخ':getTodayStr(),'بواسطة':currentUser.name}});
+showOperationSuccessNotification({opSeq:seq.opSeq,docSeq:seq.docSeq,docTypeLabel:'قسيمة السلفة',empSeq:emp.empSeq,txTypeTitle:'سلفة عامل',party:emp.name,notes,amount:amt,currency:cur,extraDocInfo:`تم خصم السلفة تلقائياً من الصندوق (${cur}).`},()=>previewTransactionReceiptById(txId));
+}
+function openWorkerPayslipModal(empId){let emp=db.employees.find(e=>String(e.id)===String(empId));if(!emp)return;let s=document.getElementById('payroll-start-date').value||getTodayStr(),e=document.getElementById('payroll-end-date').value||getTodayStr(),snap=buildPayrollSnapshotFromData(emp,s,e),pSeq=snap.lastPayslipTx?snap.lastPayslipTx.docSeq:(db.seq_counters.lastPayslipSeq+1),oSeq=snap.lastPayslipTx?snap.lastPayslipTx.opSeq:'-';showInFixedScalePreview(buildDetailedPayslipHtml(snap,pSeq,oSeq))}
+
+applyCompanyBranding();setupRealtimeAttendanceSync();
+syncWithSystem().then(()=>{let sv=sessionStorage.getItem('accLoggedInUser')||sessionStorage.getItem('loggedInUser');if(sv){let u=JSON.parse(sv);if(u.role==='إدارة'||u.role==='محاسبة'){currentUser=u;showApp()}}});
+</script>
+</body>
+</html>
